@@ -20,16 +20,17 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-// Credenciales Firebase
+// Configuración de tu nuevo proyecto Gastos Próximos
 const firebaseConfig = {
-  apiKey: "AIzaSyBGGfMzmGfRH614IT5wwG2kZOtUDBd16ok",
-  authDomain: "mensuales-8de3d.firebaseapp.com",
-  projectId: "mensuales-8de3d",
-  storageBucket: "mensuales-8de3d.firebasestorage.app",
-  messagingSenderId: "248967622199",
-  appId: "1:248967622199:web:86e53f1b115e974bb8d9b2"
+  apiKey: "AIzaSyBPO15mVtUt1fKx3aQkGIAZ37JsMAR_j9Q",
+  authDomain: "gastos-proximos.firebaseapp.com",
+  projectId: "gastos-proximos",
+  storageBucket: "gastos-proximos.firebasestorage.app",
+  messagingSenderId: "66581109039",
+  appId: "1:66581109039:web:352d928b97a3811420a9da"
 };
 
+// Inicialización de Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
