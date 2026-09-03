@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   INTEGRACIÓN NUBE CON MENSUALES
+   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -21,7 +21,7 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-// Credenciales del proyecto unificado MENSUALES
+// Credenciales del proyecto unificado
 const firebaseConfig = {
   apiKey: "AIzaSyBGGfMzmGfRH614IT5wwG2kZOtUDBd16ok",
   authDomain: "mensuales-8de3d.firebaseapp.com",
@@ -44,10 +44,7 @@ let unsubscribeExpenses = null;
 const $ = id => document.getElementById(id);
 
 
-// ==========================================
 // ELEMENTOS DEL DOM
-// ==========================================
-
 const modal = $("modal");
 const openModalBtn = $("openModalBtn");
 const emptyAddBtn = $("emptyAddBtn");
@@ -63,10 +60,7 @@ const totalDebts = $("totalDebts");
 const itemsCount = $("itemsCount");
 
 
-// ==========================================
-// FIRESTORE EN TIEMPO REAL
-// ==========================================
-
+// FIRESTORE SYNC
 function getExpensesCollectionRef() {
   if (!currentUser) return null;
   return collection(db, "users", currentUser.uid, "proximos");
@@ -98,17 +92,23 @@ function stopFirestoreSync() {
 async function saveExpenseToFirestore(item) {
   if (!currentUser) return;
   const docRef = doc(db, "users", currentUser.uid, "proximos", item.id);
-  await setDoc(docRef, {
-    type: item.type,
-    description: item.description,
-    category: item.category,
-    amount: item.amount,
-    quantity: item.quantity,
-    date: item.date,
-    notes: item.notes,
-    paid: item.paid,
-    createdAt: item.createdAt
-  });
+
+  const payload = {
+    type: item.type || "expense",
+    description: item.description || "",
+    category: item.category || "otros",
+    amount: item.amount === null || isNaN(item.amount) ? null : Number(item.amount),
+    quantity: Number(item.quantity) || 1,
+    date: item.date || new Date().toISOString().slice(0, 10),
+    notes: item.notes || "",
+    paid: Boolean(item.paid),
+    createdAt: item.createdAt || new Date().toISOString()
+  };
+
+  if (item.linkedMensualId) payload.linkedMensualId = item.linkedMensualId;
+  if (item.linkedMonthKey) payload.linkedMonthKey = item.linkedMonthKey;
+
+  await setDoc(docRef, payload, { merge: true });
 }
 
 async function deleteExpenseFromFirestore(id) {
@@ -118,10 +118,7 @@ async function deleteExpenseFromFirestore(id) {
 }
 
 
-// ==========================================
-// AUTENTICACIÓN FIREBASE
-// ==========================================
-
+// AUTENTICACIÓN
 function setAuthMessage(message, success = false) {
   $("authMessage").textContent = message;
   $("authMessage").classList.toggle("success", success);
@@ -129,14 +126,12 @@ function setAuthMessage(message, success = false) {
 
 function updateAuthInterface() {
   const isLogin = authMode === "login";
-
   $("authSubmitBtn").disabled = false;
   $("authSubmitBtn").textContent = isLogin ? "Iniciar sesión" : "Crear cuenta";
   $("authSwitchBtn").textContent = isLogin
     ? "¿No tenés una cuenta? Registrate"
     : "¿Ya tenés una cuenta? Iniciá sesión";
   $("authPassword").autocomplete = isLogin ? "current-password" : "new-password";
-
   setAuthMessage("");
 }
 
@@ -153,7 +148,6 @@ function firebaseErrorMessage(error) {
     "auth/too-many-requests": "Demasiados intentos. Esperá un momento.",
     "auth/network-request-failed": "No hay conexión con Firebase."
   };
-
   return messages[code] || `Error (${code || "desconocido"}). Volvé a intentar.`;
 }
 
@@ -164,7 +158,6 @@ $("authSwitchBtn").addEventListener("click", () => {
 
 $("authForm").addEventListener("submit", async event => {
   event.preventDefault();
-
   const email = $("authEmail").value.trim();
   const password = $("authPassword").value;
 
@@ -228,10 +221,7 @@ onAuthStateChanged(auth, user => {
 });
 
 
-// ==========================================
 // OCULTAR / MOSTRAR MONTOS
-// ==========================================
-
 function setupAmountsToggle() {
   const toggleAmountsBtn = $("toggleAmountsBtn");
   if (!toggleAmountsBtn) return;
@@ -254,10 +244,7 @@ function setupAmountsToggle() {
 }
 
 
-// ==========================================
 // MODAL
-// ==========================================
-
 function openModal() {
   modal.classList.add("show");
 }
@@ -278,11 +265,6 @@ modal.addEventListener("click", event => {
   if (event.target === modal) closeModal();
 });
 
-
-// ==========================================
-// FECHA POR DEFECTO
-// ==========================================
-
 function setDefaultDate() {
   const dateInput = $("date");
   if (!dateInput.value) {
@@ -295,10 +277,7 @@ function setDefaultDate() {
 }
 
 
-// ==========================================
-// GUARDAR / EDITAR REGISTRO
-// ==========================================
-
+// GUARDAR / EDITAR
 expenseForm.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -337,10 +316,7 @@ expenseForm.addEventListener("submit", async event => {
 });
 
 
-// ==========================================
-// FORMATEADORES
-// ==========================================
-
+// FORMATEADORES & MAPEOS
 function formatMoney(value) {
   if (value === null || value === undefined || isNaN(value)) return null;
   return new Intl.NumberFormat("es-AR", {
@@ -402,10 +378,7 @@ function mapCategoryToMensuales(category) {
 }
 
 
-// ==========================================
-// RENDER Y FILTROS
-// ==========================================
-
+// RENDER
 function render() {
   updateSummary();
   renderExpenses();
@@ -484,6 +457,8 @@ function createExpenseElement(expense) {
         <button class="action-button" title="Editar" data-action="edit" data-id="${expense.id}">✏️</button>
         <button class="action-button delete" title="Eliminar" data-action="delete" data-id="${expense.id}">🗑️</button>
       </div>
+    </div>
+  `;
 
   article.querySelectorAll("button[data-action]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -495,15 +470,12 @@ function createExpenseElement(expense) {
       if (action === "delete") deleteExpense(id);
     });
   });
-  
+
   return article;
 }
 
 
-// ==========================================
-// ACCIONES (MARCAR PAGADO Y ENVIAR A MENSUALES)
-// ==========================================
-
+// ACCIONES
 function editExpense(id) {
   const expense = expenses.find(item => item.id === id);
   if (!expense) return;
@@ -532,15 +504,15 @@ async function markAsPaid(id) {
     return;
   }
 
-  // 1. Marcar como pagado en Gastos Próximos (Firestore)
-  expense.paid = true;
-  await saveExpenseToFirestore(expense);
-
-  // 2. Extraer el mes correspondiente (ej: "2026-09")
   const payDate = expense.date || new Date().toISOString().slice(0, 10);
   const monthKey = payDate.slice(0, 7);
+  const mensualId = `gp-${expense.id}`;
 
-  // 3. Documento del mes en MENSUALES
+  expense.paid = true;
+  expense.linkedMensualId = mensualId;
+  expense.linkedMonthKey = monthKey;
+  await saveExpenseToFirestore(expense);
+
   const monthDocRef = doc(db, "users", currentUser.uid, "months", monthKey);
 
   try {
@@ -549,29 +521,54 @@ async function markAsPaid(id) {
 
     if (docSnap.exists()) {
       monthData = docSnap.data();
-      if (!Array.isArray(monthData.expenses)) {
-        monthData.expenses = [];
-      }
+      if (!Array.isArray(monthData.expenses)) monthData.expenses = [];
     }
 
-    // 4. Formato del objeto para MENSUALES
     const newMensualExpense = {
-      id: `gp-${Date.now()}`,
+      id: mensualId,
       date: payDate,
       description: expense.description,
       category: mapCategoryToMensuales(expense.category),
       amount: Number(expense.amount)
     };
 
+    monthData.expenses = monthData.expenses.filter(e => e.id !== mensualId);
     monthData.expenses.push(newMensualExpense);
 
-    // 5. Guardar en el mes correspondiente de MENSUALES
     await setDoc(monthDocRef, monthData, { merge: true });
-
     alert(`✓ Pago registrado y sumado a MENSUALES (${monthKey})`);
   } catch (error) {
     console.error("Error al transferir a MENSUALES:", error);
     alert("Se marcó como pagado, pero hubo un error al sincronizar con MENSUALES.");
+  }
+}
+
+async function markAsUnpaid(id) {
+  const expense = expenses.find(item => item.id === id);
+  if (!expense) return;
+
+  const payDate = expense.date || new Date().toISOString().slice(0, 10);
+  const monthKey = expense.linkedMonthKey || payDate.slice(0, 7);
+  const mensualId = expense.linkedMensualId || `gp-${expense.id}`;
+
+  expense.paid = false;
+  await saveExpenseToFirestore(expense);
+
+  try {
+    const monthDocRef = doc(db, "users", currentUser.uid, "months", monthKey);
+    const docSnap = await getDoc(monthDocRef);
+
+    if (docSnap.exists()) {
+      const monthData = docSnap.data();
+      if (Array.isArray(monthData.expenses)) {
+        monthData.expenses = monthData.expenses.filter(e => e.id !== mensualId);
+        await setDoc(monthDocRef, monthData, { merge: true });
+      }
+    }
+    alert("↩ Registro vuelto a pendiente y quitado de MENSUALES.");
+  } catch (error) {
+    console.error("Error al remover de MENSUALES:", error);
+    alert("Se volvió a pendiente, pero hubo un error al quitarlo de MENSUALES.");
   }
 }
 
@@ -586,10 +583,7 @@ async function deleteExpense(id) {
 }
 
 
-// ==========================================
 // RESUMEN
-// ==========================================
-
 function updateSummary() {
   const pending = expenses.filter(expense => !expense.paid);
   const total = pending.reduce((sum, expense) => sum + (expense.amount || 0), 0);
