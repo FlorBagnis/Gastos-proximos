@@ -490,11 +490,12 @@ function createExpenseElement(expense) {
       const id = btn.dataset.id;
       const action = btn.dataset.action;
       if (action === "pay") markAsPaid(id);
+      if (action === "unpay") markAsUnpaid(id);
       if (action === "edit") editExpense(id);
       if (action === "delete") deleteExpense(id);
     });
   });
-
+  
   return article;
 }
 
