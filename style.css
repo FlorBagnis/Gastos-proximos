@@ -43,20 +43,14 @@ body {
   display: none !important;
 }
 
-/* ==========================================
-   APP CONTAINER
-========================================== */
-
+/* CONTAINER */
 .app {
   width: min(1150px, 92%);
   margin: auto;
   padding: 45px 0;
 }
 
-/* ==========================================
-   HEADER
-========================================== */
-
+/* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
@@ -98,10 +92,7 @@ body {
   font-weight: 600;
 }
 
-/* ==========================================
-   BOTONES
-========================================== */
-
+/* BOTONES */
 .primary-button {
   border: none;
   background: var(--pink);
@@ -144,10 +135,14 @@ body {
   color: var(--pink-dark);
 }
 
-/* ==========================================
-   AUTENTICACIÓN
-========================================== */
+a.secondary-button.back-link {
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
+/* AUTENTICACIÓN */
 .auth-section {
   min-height: 100vh;
   display: grid;
@@ -233,10 +228,7 @@ body {
   margin: 10px auto 0;
 }
 
-/* ==========================================
-   RESUMEN
-========================================== */
-
+/* RESUMEN */
 .summary-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
@@ -290,10 +282,7 @@ body {
   font-size: 30px;
 }
 
-/* ==========================================
-   TOOLBAR Y FILTROS
-========================================== */
-
+/* TOOLBAR Y FILTROS */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -340,10 +329,7 @@ body {
   color: white;
 }
 
-/* ==========================================
-   LISTA DE GASTOS
-========================================== */
-
+/* LISTA */
 .expenses-list {
   display: flex;
   flex-direction: column;
@@ -439,10 +425,7 @@ body {
   color: var(--pink-dark);
 }
 
-/* ==========================================
-   ACCIONES
-========================================== */
-
+/* ACCIONES */
 .actions {
   display: flex;
   gap: 6px;
@@ -467,14 +450,19 @@ body {
   color: var(--green);
 }
 
+.action-button.unpay {
+  color: #e67e22;
+}
+
+.action-button.unpay:hover {
+  background: #fdf2e9;
+}
+
 .action-button.delete {
   color: var(--red);
 }
 
-/* ==========================================
-   ESTADO VACÍO
-========================================== */
-
+/* EMPTY STATE */
 .empty-state {
   text-align: center;
   padding: 70px 20px;
@@ -501,10 +489,7 @@ body {
   line-height: 1.6;
 }
 
-/* ==========================================
-   FOOTER
-========================================== */
-
+/* FOOTER */
 footer {
   text-align: center;
   margin-top: 45px;
@@ -512,10 +497,7 @@ footer {
   font-size: 12px;
 }
 
-/* ==========================================
-   MODAL
-========================================== */
-
+/* MODAL */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -584,10 +566,7 @@ footer {
   font-size: 12px;
 }
 
-/* ==========================================
-   FORMULARIO
-========================================== */
-
+/* FORMULARIO */
 .form-group {
   margin-bottom: 18px;
 }
@@ -719,10 +698,7 @@ textarea {
   background: var(--pink-dark);
 }
 
-/* ==========================================
-   OCULTAR MONTOS (••••••)
-========================================== */
-
+/* OCULTAR MONTOS */
 body.amounts-hidden #totalPending,
 body.amounts-hidden #nextSevenDays,
 body.amounts-hidden #thisMonth,
@@ -757,10 +733,7 @@ body.amounts-hidden .expense-amount strong::after {
   justify-content: flex-end;
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
-
+/* RESPONSIVE */
 @media (max-width: 850px) {
   .summary-grid {
     grid-template-columns: 1fr 1fr;
@@ -841,48 +814,5 @@ body.amounts-hidden .expense-amount strong::after {
   body.amounts-hidden .expense-amount strong::after {
     justify-content: flex-start;
   }
-}
-
-/* ==========================================
-   BOTÓN RETORNO A MENSUALES (ESTÉTICO)
-========================================== */
-
-.btn-back-mensuales {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--white);
-  color: var(--pink-dark);
-  border: 1px solid var(--border);
-  padding: 11px 18px;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 4px 14px rgba(232, 93, 158, 0.08);
-  transition: all 0.2s ease;
-}
-
-.btn-back-mensuales:hover {
-  background: var(--pink-light);
-  border-color: var(--pink);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(232, 93, 158, 0.15);
-}
-
-.btn-back-mensuales .heart-icon {
-  font-size: 14px;
-  transition: transform 0.2s ease;
-}
-
-.btn-back-mensuales:hover .heart-icon {
-  transform: scale(1.15);
-}
-
-a.secondary-button.back-link {
-  text-decoration: none !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
