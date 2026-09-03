@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   FIREBASE AUTHENTICATION + LOCAL STORAGE
+   FIREBASE AUTHENTICATION + FIRESTORE (NUBE)
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -11,6 +11,14 @@ import {
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 // Credenciales Firebase
 const firebaseConfig = {
@@ -24,11 +32,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 let currentUser = null;
 let expenses = [];
 let currentFilter = "all";
 let authMode = "login";
+let unsubscribeExpenses = null;
 
 const $ = id => document.getElementById(id);
 
@@ -53,20 +63,57 @@ const itemsCount = $("itemsCount");
 
 
 // ==========================================
-// CONTROL DE DATOS Y USUARIOS
+// FIRESTORE (SINCRONIZACIÓN EN LA NUBE)
 // ==========================================
 
-function getStorageKey() {
-  return currentUser ? `gastos_proximos_${currentUser.uid}` : "gastos_proximos_guest";
+function getExpensesCollectionRef() {
+  if (!currentUser) return null;
+  return collection(db, "users", currentUser.uid, "proximos");
 }
 
-function loadUserData() {
-  const saved = localStorage.getItem(getStorageKey());
-  expenses = saved ? JSON.parse(saved) : [];
+function startFirestoreSync() {
+  stopFirestoreSync();
+  const colRef = getExpensesCollectionRef();
+  if (!colRef) return;
+
+  unsubscribeExpenses = onSnapshot(colRef, snapshot => {
+    expenses = [];
+    snapshot.forEach(docSnap => {
+      expenses.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    render();
+  }, error => {
+    console.error("Error en Firestore:", error);
+  });
 }
 
-function saveData() {
-  localStorage.setItem(getStorageKey(), JSON.stringify(expenses));
+function stopFirestoreSync() {
+  if (typeof unsubscribeExpenses === "function") {
+    unsubscribeExpenses();
+    unsubscribeExpenses = null;
+  }
+}
+
+async function saveExpenseToFirestore(item) {
+  if (!currentUser) return;
+  const docRef = doc(db, "users", currentUser.uid, "proximos", item.id);
+  await setDoc(docRef, {
+    type: item.type,
+    description: item.description,
+    category: item.category,
+    amount: item.amount,
+    quantity: item.quantity,
+    date: item.date,
+    notes: item.notes,
+    paid: item.paid,
+    createdAt: item.createdAt
+  });
+}
+
+async function deleteExpenseFromFirestore(id) {
+  if (!currentUser) return;
+  const docRef = doc(db, "users", currentUser.uid, "proximos", id);
+  await deleteDoc(docRef);
 }
 
 
@@ -103,8 +150,7 @@ function firebaseErrorMessage(error) {
     "auth/user-not-found": "No existe una cuenta con ese email.",
     "auth/wrong-password": "La contraseña es incorrecta.",
     "auth/too-many-requests": "Demasiados intentos. Esperá un momento.",
-    "auth/network-request-failed": "No hay conexión con Firebase.",
-    "auth/operation-not-allowed": "El registro con email no está habilitado."
+    "auth/network-request-failed": "No hay conexión con Firebase."
   };
 
   return messages[code] || `Error (${code || "desconocido"}). Volvé a intentar.`;
@@ -149,6 +195,7 @@ $("logoutBtn").addEventListener("click", async () => {
   if (!confirmed) return;
 
   try {
+    stopFirestoreSync();
     await signOut(auth);
   } catch (error) {
     console.error("Error al salir:", error);
@@ -160,6 +207,7 @@ onAuthStateChanged(auth, user => {
   currentUser = user;
 
   if (!user) {
+    stopFirestoreSync();
     expenses = [];
     $("authSection").classList.remove("hidden");
     $("appContent").classList.add("hidden");
@@ -173,10 +221,9 @@ onAuthStateChanged(auth, user => {
   $("appContent").classList.remove("hidden");
   $("userEmail").textContent = user.email || "";
 
-  loadUserData();
   setDefaultDate();
   setupAmountsToggle();
-  render();
+  startFirestoreSync();
 });
 
 
@@ -251,7 +298,7 @@ function setDefaultDate() {
 // GUARDAR / EDITAR REGISTRO
 // ==========================================
 
-expenseForm.addEventListener("submit", event => {
+expenseForm.addEventListener("submit", async event => {
   event.preventDefault();
 
   const id = $("expenseId").value;
@@ -264,8 +311,10 @@ expenseForm.addEventListener("submit", event => {
   const notes = $("notes").value.trim();
   const amount = amountValue === "" ? null : Number(amountValue);
 
+  const currentExpense = id ? expenses.find(e => e.id === id) : null;
+
   const item = {
-    id: id || Date.now().toString(),
+    id: id || `item-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     type,
     description,
     category,
@@ -273,24 +322,17 @@ expenseForm.addEventListener("submit", event => {
     quantity,
     date,
     notes,
-    paid: false,
-    createdAt: new Date().toISOString()
+    paid: currentExpense ? currentExpense.paid : false,
+    createdAt: currentExpense ? currentExpense.createdAt : new Date().toISOString()
   };
 
-  if (id) {
-    const index = expenses.findIndex(e => e.id === id);
-    if (index !== -1) {
-      item.paid = expenses[index].paid;
-      item.createdAt = expenses[index].createdAt;
-      expenses[index] = item;
-    }
-  } else {
-    expenses.push(item);
+  try {
+    await saveExpenseToFirestore(item);
+    closeModal();
+  } catch (error) {
+    console.error("Error al guardar en Firestore:", error);
+    alert("No se pudo guardar el registro en la nube.");
   }
-
-  saveData();
-  closeModal();
-  render();
 });
 
 
@@ -467,25 +509,22 @@ function editExpense(id) {
   openModal();
 }
 
-function markAsPaid(id) {
+async function markAsPaid(id) {
   const expense = expenses.find(item => item.id === id);
   if (!expense) return;
 
   expense.paid = true;
-  saveData();
-  render();
+  await saveExpenseToFirestore(expense);
 }
 
-function deleteExpense(id) {
+async function deleteExpense(id) {
   const expense = expenses.find(item => item.id === id);
   if (!expense) return;
 
   const confirmed = confirm(`¿Querés eliminar "${expense.description}"?`);
   if (!confirmed) return;
 
-  expenses = expenses.filter(item => item.id !== id);
-  saveData();
-  render();
+  await deleteExpenseFromFirestore(id);
 }
 
 
