@@ -479,13 +479,11 @@ function createExpenseElement(expense) {
         ${
           !expense.paid
             ? `<button class="action-button pay" title="Marcar como pagado y enviar a MENSUALES" data-action="pay" data-id="${expense.id}">✓</button>`
-            : ""
+            : `<button class="action-button unpay" title="Volver a pendiente y quitar de MENSUALES" data-action="unpay" data-id="${expense.id}">✖</button>`
         }
         <button class="action-button" title="Editar" data-action="edit" data-id="${expense.id}">✏️</button>
         <button class="action-button delete" title="Eliminar" data-action="delete" data-id="${expense.id}">🗑️</button>
       </div>
-    </div>
-  `;
 
   article.querySelectorAll("button[data-action]").forEach(btn => {
     btn.addEventListener("click", () => {
