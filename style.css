@@ -879,3 +879,10 @@ body.amounts-hidden .expense-amount strong::after {
   transform: scale(1.15);
 }
 
+a.secondary-button.back-link {
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
