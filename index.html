@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Gastos Próximos</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+
+      <div>
+        <span class="eyebrow">MI ORGANIZACIÓN 💗</span>
+
+        <h1>Gastos Próximos</h1>
+
+        <p>
+          Todo lo que tengo que pagar, recordar o debo.
+        </p>
+      </div>
+
+      <button
+        class="primary-button"
+        id="openModalBtn"
+      >
+        ＋ Agregar
+      </button>
+
+    </header>
+
+
+    <!-- RESUMEN -->
+    <section class="summary-grid">
+
+      <article class="summary-card main-card">
+
+        <div class="card-icon">💰</div>
+
+        <div>
+          <span>Total pendiente</span>
+
+          <strong id="totalPending">
+            $0
+          </strong>
+        </div>
+
+      </article>
+
+
+      <article class="summary-card">
+
+        <div class="small-icon">📅</div>
+
+        <span>Próximos 7 días</span>
+
+        <strong id="nextSevenDays">
+          $0
+        </strong>
+
+      </article>
+
+
+      <article class="summary-card">
+
+        <div class="small-icon">📆</div>
+
+        <span>Este mes</span>
+
+        <strong id="thisMonth">
+          $0
+        </strong>
+
+      </article>
+
+
+      <article class="summary-card">
+
+        <div class="small-icon">💸</div>
+
+        <span>Deudas</span>
+
+        <strong id="totalDebts">
+          $0
+        </strong>
+
+      </article>
+
+    </section>
+
+
+    <!-- FILTROS -->
+    <section class="toolbar">
+
+      <div class="section-title">
+
+        <h2>Mis pendientes</h2>
+
+        <span id="itemsCount">
+          0 registros
+        </span>
+
+      </div>
+
+
+      <div class="filters">
+
+        <button
+          class="filter active"
+          data-filter="all"
+        >
+          Todos
+        </button>
+
+        <button
+          class="filter"
+          data-filter="pending"
+        >
+          Pendientes
+        </button>
+
+        <button
+          class="filter"
+          data-filter="debt"
+        >
+          Deudas
+        </button>
+
+        <button
+          class="filter"
+          data-filter="paid"
+        >
+          Pagados
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- LISTA -->
+    <main>
+
+      <div id="expensesList" class="expenses-list">
+      </div>
+
+
+      <!-- EMPTY STATE -->
+      <div
+        id="emptyState"
+        class="empty-state"
+      >
+
+        <div class="empty-icon">
+          🌸
+        </div>
+
+        <h3>No tenés pendientes</h3>
+
+        <p>
+          Agregá un gasto, una deuda o algo
+          que quieras recordar pagar.
+        </p>
+
+        <button
+          class="primary-button"
+          id="emptyAddBtn"
+        >
+          ＋ Agregar primer registro
+        </button>
+
+      </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+      <p>
+        Hecho con 💗 para organizar mejor mis gastos.
+      </p>
+
+    </footer>
+
+  </div>
+
+
+  <!-- MODAL -->
+  <div
+    class="modal-overlay"
+    id="modal"
+  >
+
+    <div class="modal">
+
+      <button
+        class="close-modal"
+        id="closeModalBtn"
+      >
+        ×
+      </button>
+
+
+      <div class="modal-header">
+
+        <span class="modal-icon">
+          🌸
+        </span>
+
+        <div>
+
+          <h2 id="modalTitle">
+            Agregar registro
+          </h2>
+
+          <p>
+            Guardá algo que tengas que pagar o recordar.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <form id="expenseForm">
+
+        <input
+          type="hidden"
+          id="expenseId"
+        >
+
+
+        <!-- TIPO -->
+        <div class="form-group">
+
+          <label>
+            ¿Qué querés registrar?
+          </label>
+
+          <div class="type-options">
+
+            <label class="type-option">
+
+              <input
+                type="radio"
+                name="type"
+                value="expense"
+                checked
+              >
+
+              <span>
+                🧾
+                <strong>Gasto próximo</strong>
+                <small>Algo que tengo que pagar</small>
+              </span>
+
+            </label>
+
+
+            <label class="type-option">
+
+              <input
+                type="radio"
+                name="type"
+                value="debt"
+              >
+
+              <span>
+                💸
+                <strong>Deuda</strong>
+                <small>Algo que debo</small>
+              </span>
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+        <div class="form-group">
+
+          <label for="description">
+            ¿Qué tenés que pagar?
+          </label>
+
+          <input
+            type="text"
+            id="description"
+            placeholder="Ej: Bidones de agua"
+            required
+          >
+
+        </div>
+
+
+        <!-- CATEGORIA -->
+        <div class="form-group">
+
+          <label for="category">
+            Categoría
+          </label>
+
+          <select id="category">
+
+            <option value="hogar">
+              🏠 Hogar
+            </option>
+
+            <option value="servicios">
+              💡 Servicios
+            </option>
+
+            <option value="comida">
+              🍔 Comida
+            </option>
+
+            <option value="mascotas">
+              🐾 Mascotas
+            </option>
+
+            <option value="deudas">
+              💸 Deudas
+            </option>
+
+            <option value="salud">
+              💊 Salud
+            </option>
+
+            <option value="transporte">
+              🚗 Transporte
+            </option>
+
+            <option value="otros">
+              📦 Otros
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- MONTO + CANTIDAD -->
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label for="amount">
+              Monto
+            </label>
+
+            <div class="money-input">
+
+              <span>$</span>
+
+              <input
+                type="number"
+                id="amount"
+                min="0"
+                step="0.01"
+                placeholder="0"
+              >
+
+            </div>
+
+            <small class="helper">
+              Podés dejarlo vacío si todavía no sabés el monto.
+            </small>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="quantity">
+              Cantidad
+            </label>
+
+            <input
+              type="number"
+              id="quantity"
+              min="1"
+              value="1"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- FECHA -->
+        <div class="form-group">
+
+          <label for="date">
+            ¿Cuándo lo tengo que pagar?
+          </label>
+
+          <input
+            type="date"
+            id="date"
+            required
+          >
+
+        </div>
+
+
+        <!-- NOTA -->
+        <div class="form-group">
+
+          <label for="notes">
+            Nota
+          </label>
+
+          <textarea
+            id="notes"
+            rows="3"
+            placeholder="Ej: Le debo 3 bidones al aguatero"
+          ></textarea>
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="save-button"
+        >
+          Guardar registro
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <script src="app.js"></script>
+
+</body>
+
+</html>
