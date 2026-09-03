@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   FIREBASE AUTHENTICATION + FIRESTORE (NUBE)
+   INTEGRACIÓN NUBE CON MENSUALES
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -21,7 +21,7 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-// Configuración de tu nuevo proyecto Gastos Próximos
+// Credenciales del proyecto unificado MENSUALES
 const firebaseConfig = {
   apiKey: "AIzaSyBGGfMzmGfRH614IT5wwG2kZOtUDBd16ok",
   authDomain: "mensuales-8de3d.firebaseapp.com",
@@ -31,7 +31,6 @@ const firebaseConfig = {
   appId: "1:248967622199:web:86e53f1b115e974bb8d9b2"
 };
 
-// Inicialización de Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -65,7 +64,7 @@ const itemsCount = $("itemsCount");
 
 
 // ==========================================
-// FIRESTORE (SINCRONIZACIÓN EN LA NUBE)
+// FIRESTORE EN TIEMPO REAL
 // ==========================================
 
 function getExpensesCollectionRef() {
@@ -388,6 +387,20 @@ function getCategoryName(category) {
   return names[category] || "Otros";
 }
 
+function mapCategoryToMensuales(category) {
+  const map = {
+    comida: "Alimentos",
+    transporte: "Transporte",
+    hogar: "Hogar",
+    servicios: "Servicios",
+    salud: "Salud",
+    mascotas: "Mascotas",
+    deudas: "Otros",
+    otros: "Otros"
+  };
+  return map[category] || "Otros";
+}
+
 
 // ==========================================
 // RENDER Y FILTROS
@@ -465,7 +478,7 @@ function createExpenseElement(expense) {
       <div class="actions">
         ${
           !expense.paid
-            ? `<button class="action-button pay" title="Marcar como pagado" data-action="pay" data-id="${expense.id}">✓</button>`
+            ? `<button class="action-button pay" title="Marcar como pagado y enviar a MENSUALES" data-action="pay" data-id="${expense.id}">✓</button>`
             : ""
         }
         <button class="action-button" title="Editar" data-action="edit" data-id="${expense.id}">✏️</button>
@@ -489,7 +502,7 @@ function createExpenseElement(expense) {
 
 
 // ==========================================
-// ACCIONES
+// ACCIONES (MARCAR PAGADO Y ENVIAR A MENSUALES)
 // ==========================================
 
 function editExpense(id) {
@@ -515,8 +528,52 @@ async function markAsPaid(id) {
   const expense = expenses.find(item => item.id === id);
   if (!expense) return;
 
+  if (expense.amount === null || expense.amount <= 0) {
+    alert("Para marcarlo como pagado y enviarlo a MENSUALES, tenés que definir un monto primero.");
+    return;
+  }
+
+  // 1. Marcar como pagado en Gastos Próximos (Firestore)
   expense.paid = true;
   await saveExpenseToFirestore(expense);
+
+  // 2. Extraer el mes correspondiente (ej: "2026-09")
+  const payDate = expense.date || new Date().toISOString().slice(0, 10);
+  const monthKey = payDate.slice(0, 7);
+
+  // 3. Documento del mes en MENSUALES
+  const monthDocRef = doc(db, "users", currentUser.uid, "months", monthKey);
+
+  try {
+    const docSnap = await getDoc(monthDocRef);
+    let monthData = { budget: 0, expenses: [] };
+
+    if (docSnap.exists()) {
+      monthData = docSnap.data();
+      if (!Array.isArray(monthData.expenses)) {
+        monthData.expenses = [];
+      }
+    }
+
+    // 4. Formato del objeto para MENSUALES
+    const newMensualExpense = {
+      id: `gp-${Date.now()}`,
+      date: payDate,
+      description: expense.description,
+      category: mapCategoryToMensuales(expense.category),
+      amount: Number(expense.amount)
+    };
+
+    monthData.expenses.push(newMensualExpense);
+
+    // 5. Guardar en el mes correspondiente de MENSUALES
+    await setDoc(monthDocRef, monthData, { merge: true });
+
+    alert(`✓ Pago registrado y sumado a MENSUALES (${monthKey})`);
+  } catch (error) {
+    console.error("Error al transferir a MENSUALES:", error);
+    alert("Se marcó como pagado, pero hubo un error al sincronizar con MENSUALES.");
+  }
 }
 
 async function deleteExpense(id) {
