@@ -1,71 +1,209 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   JAVASCRIPT
+   FIREBASE AUTHENTICATION + LOCAL STORAGE
 ========================================== */
 
-const STORAGE_KEY = "gastos_proximos_v1";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-let expenses = JSON.parse(
-  localStorage.getItem(STORAGE_KEY)
-) || [];
+// Credenciales Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBGGfMzmGfRH614IT5wwG2kZOtUDBd16ok",
+  authDomain: "mensuales-8de3d.firebaseapp.com",
+  projectId: "mensuales-8de3d",
+  storageBucket: "mensuales-8de3d.firebasestorage.app",
+  messagingSenderId: "248967622199",
+  appId: "1:248967622199:web:86e53f1b115e974bb8d9b2"
+};
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+let currentUser = null;
+let expenses = [];
 let currentFilter = "all";
+let authMode = "login";
+
+const $ = id => document.getElementById(id);
 
 
 // ==========================================
-// ELEMENTOS
+// ELEMENTOS DEL DOM
 // ==========================================
 
-const modal = document.getElementById("modal");
+const modal = $("modal");
+const openModalBtn = $("openModalBtn");
+const emptyAddBtn = $("emptyAddBtn");
+const closeModalBtn = $("closeModalBtn");
+const expenseForm = $("expenseForm");
+const expensesList = $("expensesList");
+const emptyState = $("emptyState");
 
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const emptyAddBtn =
-  document.getElementById("emptyAddBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
-
-const expenseForm =
-  document.getElementById("expenseForm");
-
-const expensesList =
-  document.getElementById("expensesList");
-
-const emptyState =
-  document.getElementById("emptyState");
-
-const totalPending =
-  document.getElementById("totalPending");
-
-const nextSevenDays =
-  document.getElementById("nextSevenDays");
-
-const thisMonth =
-  document.getElementById("thisMonth");
-
-const totalDebts =
-  document.getElementById("totalDebts");
-
-const itemsCount =
-  document.getElementById("itemsCount");
+const totalPending = $("totalPending");
+const nextSevenDays = $("nextSevenDays");
+const thisMonth = $("thisMonth");
+const totalDebts = $("totalDebts");
+const itemsCount = $("itemsCount");
 
 
 // ==========================================
-// INICIAR
+// CONTROL DE DATOS Y USUARIOS
 // ==========================================
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+function getStorageKey() {
+  return currentUser ? `gastos_proximos_${currentUser.uid}` : "gastos_proximos_guest";
+}
 
-    setDefaultDate();
+function loadUserData() {
+  const saved = localStorage.getItem(getStorageKey());
+  expenses = saved ? JSON.parse(saved) : [];
+}
 
-    render();
+function saveData() {
+  localStorage.setItem(getStorageKey(), JSON.stringify(expenses));
+}
 
+
+// ==========================================
+// AUTENTICACIÓN FIREBASE
+// ==========================================
+
+function setAuthMessage(message, success = false) {
+  $("authMessage").textContent = message;
+  $("authMessage").classList.toggle("success", success);
+}
+
+function updateAuthInterface() {
+  const isLogin = authMode === "login";
+
+  $("authSubmitBtn").disabled = false;
+  $("authSubmitBtn").textContent = isLogin ? "Iniciar sesión" : "Crear cuenta";
+  $("authSwitchBtn").textContent = isLogin
+    ? "¿No tenés una cuenta? Registrate"
+    : "¿Ya tenés una cuenta? Iniciá sesión";
+  $("authPassword").autocomplete = isLogin ? "current-password" : "new-password";
+
+  setAuthMessage("");
+}
+
+function firebaseErrorMessage(error) {
+  const code = error?.code || "";
+  const messages = {
+    "auth/invalid-email": "El email no es válido.",
+    "auth/missing-password": "Ingresá una contraseña.",
+    "auth/weak-password": "La contraseña debe tener al menos 6 caracteres.",
+    "auth/email-already-in-use": "Ya existe una cuenta con ese email.",
+    "auth/invalid-credential": "El email o la contraseña son incorrectos.",
+    "auth/user-not-found": "No existe una cuenta con ese email.",
+    "auth/wrong-password": "La contraseña es incorrecta.",
+    "auth/too-many-requests": "Demasiados intentos. Esperá un momento.",
+    "auth/network-request-failed": "No hay conexión con Firebase.",
+    "auth/operation-not-allowed": "El registro con email no está habilitado."
+  };
+
+  return messages[code] || `Error (${code || "desconocido"}). Volvé a intentar.`;
+}
+
+$("authSwitchBtn").addEventListener("click", () => {
+  authMode = authMode === "login" ? "register" : "login";
+  updateAuthInterface();
+});
+
+$("authForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
+
+  if (!email || !password) {
+    setAuthMessage("Completá email y contraseña.");
+    return;
   }
-);
+
+  const btn = $("authSubmitBtn");
+  btn.disabled = true;
+  btn.textContent = authMode === "login" ? "Ingresando..." : "Creando cuenta...";
+
+  try {
+    if (authMode === "register") {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  } catch (error) {
+    console.error("Firebase Auth Error:", error);
+    setAuthMessage(firebaseErrorMessage(error));
+    btn.disabled = false;
+    updateAuthInterface();
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  const confirmed = confirm("¿Querés cerrar sesión?");
+  if (!confirmed) return;
+
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Error al salir:", error);
+    alert("No se pudo cerrar la sesión.");
+  }
+});
+
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+
+  if (!user) {
+    expenses = [];
+    $("authSection").classList.remove("hidden");
+    $("appContent").classList.add("hidden");
+    $("userEmail").textContent = "";
+    $("authForm").reset();
+    updateAuthInterface();
+    return;
+  }
+
+  $("authSection").classList.add("hidden");
+  $("appContent").classList.remove("hidden");
+  $("userEmail").textContent = user.email || "";
+
+  loadUserData();
+  setDefaultDate();
+  setupAmountsToggle();
+  render();
+});
+
+
+// ==========================================
+// OCULTAR / MOSTRAR MONTOS
+// ==========================================
+
+function setupAmountsToggle() {
+  const toggleAmountsBtn = $("toggleAmountsBtn");
+  if (!toggleAmountsBtn) return;
+
+  const isHidden = localStorage.getItem("gastos_proximos_hide_amounts") === "true";
+
+  if (isHidden) {
+    document.body.classList.add("amounts-hidden");
+    toggleAmountsBtn.textContent = "👁️ Mostrar montos";
+  } else {
+    document.body.classList.remove("amounts-hidden");
+    toggleAmountsBtn.textContent = "👁️ Ocultar montos";
+  }
+
+  toggleAmountsBtn.onclick = () => {
+    const hidden = document.body.classList.toggle("amounts-hidden");
+    localStorage.setItem("gastos_proximos_hide_amounts", hidden);
+    toggleAmountsBtn.textContent = hidden ? "👁️ Mostrar montos" : "👁️ Ocultar montos";
+  };
+}
 
 
 // ==========================================
@@ -73,57 +211,24 @@ document.addEventListener(
 // ==========================================
 
 function openModal() {
-
   modal.classList.add("show");
-
 }
 
 function closeModal() {
-
   modal.classList.remove("show");
-
   expenseForm.reset();
-
-  document.getElementById("expenseId").value = "";
-
-  document.getElementById("modalTitle").textContent =
-    "Agregar registro";
-
+  $("expenseId").value = "";
+  $("modalTitle").textContent = "Agregar registro";
   setDefaultDate();
-
 }
 
+openModalBtn.addEventListener("click", openModal);
+emptyAddBtn.addEventListener("click", openModal);
+closeModalBtn.addEventListener("click", closeModal);
 
-// ==========================================
-// EVENTOS MODAL
-// ==========================================
-
-openModalBtn.addEventListener(
-  "click",
-  openModal
-);
-
-emptyAddBtn.addEventListener(
-  "click",
-  openModal
-);
-
-closeModalBtn.addEventListener(
-  "click",
-  closeModal
-);
-
-
-modal.addEventListener(
-  "click",
-  (event) => {
-
-    if (event.target === modal) {
-      closeModal();
-    }
-
-  }
-);
+modal.addEventListener("click", event => {
+  if (event.target === modal) closeModal();
+});
 
 
 // ==========================================
@@ -131,679 +236,256 @@ modal.addEventListener(
 // ==========================================
 
 function setDefaultDate() {
-
-  const dateInput =
-    document.getElementById("date");
-
+  const dateInput = $("date");
   if (!dateInput.value) {
-
     const today = new Date();
-
-    const year =
-      today.getFullYear();
-
-    const month =
-      String(today.getMonth() + 1)
-        .padStart(2, "0");
-
-    const day =
-      String(today.getDate())
-        .padStart(2, "0");
-
-    dateInput.value =
-      `${year}-${month}-${day}`;
-
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    dateInput.value = `${year}-${month}-${day}`;
   }
-
 }
 
 
 // ==========================================
-// GUARDAR
+// GUARDAR / EDITAR REGISTRO
 // ==========================================
 
-expenseForm.addEventListener(
-  "submit",
-  (event) => {
+expenseForm.addEventListener("submit", event => {
+  event.preventDefault();
 
-    event.preventDefault();
+  const id = $("expenseId").value;
+  const type = document.querySelector('input[name="type"]:checked').value;
+  const description = $("description").value.trim();
+  const category = $("category").value;
+  const amountValue = $("amount").value;
+  const quantity = Number($("quantity").value) || 1;
+  const date = $("date").value;
+  const notes = $("notes").value.trim();
+  const amount = amountValue === "" ? null : Number(amountValue);
 
+  const item = {
+    id: id || Date.now().toString(),
+    type,
+    description,
+    category,
+    amount,
+    quantity,
+    date,
+    notes,
+    paid: false,
+    createdAt: new Date().toISOString()
+  };
 
-    const id =
-      document.getElementById("expenseId").value;
-
-
-    const type =
-      document.querySelector(
-        'input[name="type"]:checked'
-      ).value;
-
-
-    const description =
-      document.getElementById("description")
-        .value
-        .trim();
-
-
-    const category =
-      document.getElementById("category")
-        .value;
-
-
-    const amountValue =
-      document.getElementById("amount")
-        .value;
-
-
-    const quantity =
-      Number(
-        document.getElementById("quantity")
-          .value
-      ) || 1;
-
-
-    const date =
-      document.getElementById("date")
-        .value;
-
-
-    const notes =
-      document.getElementById("notes")
-        .value
-        .trim();
-
-
-    const amount =
-      amountValue === ""
-        ? null
-        : Number(amountValue);
-
-
-    const expense = {
-
-      id:
-        id ||
-        Date.now().toString(),
-
-      type,
-
-      description,
-
-      category,
-
-      amount,
-
-      quantity,
-
-      date,
-
-      notes,
-
-      paid: false,
-
-      createdAt:
-        new Date().toISOString()
-
-    };
-
-
-    if (id) {
-
-      const index =
-        expenses.findIndex(
-          item => item.id === id
-        );
-
-      if (index !== -1) {
-
-        expense.paid =
-          expenses[index].paid;
-
-        expense.createdAt =
-          expenses[index].createdAt;
-
-        expenses[index] =
-          expense;
-
-      }
-
-    } else {
-
-      expenses.push(expense);
-
+  if (id) {
+    const index = expenses.findIndex(e => e.id === id);
+    if (index !== -1) {
+      item.paid = expenses[index].paid;
+      item.createdAt = expenses[index].createdAt;
+      expenses[index] = item;
     }
-
-
-    saveData();
-
-    closeModal();
-
-    render();
-
+  } else {
+    expenses.push(item);
   }
-);
+
+  saveData();
+  closeModal();
+  render();
+});
 
 
 // ==========================================
-// GUARDAR LOCALSTORAGE
-// ==========================================
-
-function saveData() {
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(expenses)
-  );
-
-}
-
-
-// ==========================================
-// FORMATEAR DINERO
+// FORMATEADORES
 // ==========================================
 
 function formatMoney(value) {
-
-  if (
-    value === null ||
-    value === undefined ||
-    isNaN(value)
-  ) {
-
-    return null;
-
-  }
-
-
-  return new Intl.NumberFormat(
-    "es-AR",
-    {
-      style: "currency",
-      currency: "ARS",
-      maximumFractionDigits: 0
-    }
-  ).format(value);
-
+  if (value === null || value === undefined || isNaN(value)) return null;
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0
+  }).format(value);
 }
-
-
-// ==========================================
-// FORMATEAR FECHA
-// ==========================================
 
 function formatDate(dateString) {
-
   if (!dateString) return "";
-
-  const date =
-    new Date(
-      `${dateString}T12:00:00`
-    );
-
-  return new Intl.DateTimeFormat(
-    "es-AR",
-    {
-      day: "2-digit",
-      month: "short"
-    }
-  ).format(date);
-
+  const date = new Date(`${dateString}T12:00:00`);
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short"
+  }).format(date);
 }
-
-
-// ==========================================
-// ICONOS CATEGORIA
-// ==========================================
 
 function getCategoryIcon(category) {
-
   const icons = {
-
     hogar: "🏠",
-
     servicios: "💡",
-
     comida: "🍔",
-
     mascotas: "🐾",
-
     deudas: "💸",
-
     salud: "💊",
-
     transporte: "🚗",
-
     otros: "📦"
-
   };
-
   return icons[category] || "📦";
-
 }
-
-
-// ==========================================
-// NOMBRE CATEGORIA
-// ==========================================
 
 function getCategoryName(category) {
-
   const names = {
-
     hogar: "Hogar",
-
     servicios: "Servicios",
-
     comida: "Comida",
-
     mascotas: "Mascotas",
-
     deudas: "Deudas",
-
     salud: "Salud",
-
     transporte: "Transporte",
-
     otros: "Otros"
-
   };
-
   return names[category] || "Otros";
-
 }
 
 
 // ==========================================
-// RENDER
+// RENDER Y FILTROS
 // ==========================================
 
 function render() {
-
   updateSummary();
-
   renderExpenses();
-
 }
-
-
-// ==========================================
-// FILTRAR
-// ==========================================
 
 function getFilteredExpenses() {
-
   let filtered = [...expenses];
 
-
   if (currentFilter === "pending") {
-
-    filtered =
-      filtered.filter(
-        expense => !expense.paid
-      );
-
+    filtered = filtered.filter(e => !e.paid);
+  } else if (currentFilter === "paid") {
+    filtered = filtered.filter(e => e.paid);
+  } else if (currentFilter === "debt") {
+    filtered = filtered.filter(e => e.type === "debt");
   }
 
-
-  if (currentFilter === "paid") {
-
-    filtered =
-      filtered.filter(
-        expense => expense.paid
-      );
-
-  }
-
-
-  if (currentFilter === "debt") {
-
-    filtered =
-      filtered.filter(
-        expense => expense.type === "debt"
-      );
-
-  }
-
-
-  filtered.sort(
-    (a, b) => {
-
-      return new Date(a.date) -
-        new Date(b.date);
-
-    }
-  );
-
-
+  filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
   return filtered;
-
 }
-
-
-// ==========================================
-// RENDER LISTA
-// ==========================================
 
 function renderExpenses() {
-
-  const filtered =
-    getFilteredExpenses();
-
-
+  const filtered = getFilteredExpenses();
   expensesList.innerHTML = "";
 
-
   if (filtered.length === 0) {
-
     emptyState.style.display = "block";
-
+    updateCounter(0);
     return;
-
   }
-
 
   emptyState.style.display = "none";
-
-
-  filtered.forEach(
-    expense => {
-
-      const element =
-        createExpenseElement(expense);
-
-      expensesList.appendChild(element);
-
-    }
-  );
-
+  filtered.forEach(expense => {
+    expensesList.appendChild(createExpenseElement(expense));
+  });
 
   updateCounter(filtered.length);
-
 }
-
-
-// ==========================================
-// CREAR ITEM
-// ==========================================
 
 function createExpenseElement(expense) {
+  const article = document.createElement("article");
+  article.className = "expense";
 
-  const article =
-    document.createElement("article");
+  const icon = getCategoryIcon(expense.category);
+  const category = getCategoryName(expense.category);
 
-  article.className =
-    "expense";
+  const amountHTML = expense.amount === null
+    ? `<span class="no-amount">Monto pendiente</span>`
+    : `<strong>${formatMoney(expense.amount)}</strong>`;
 
-
-  const icon =
-    getCategoryIcon(
-      expense.category
-    );
-
-
-  const category =
-    getCategoryName(
-      expense.category
-    );
-
-
-  let amountHTML;
-
-
-  if (expense.amount === null) {
-
-    amountHTML = `
-      <span class="no-amount">
-        Monto pendiente
-      </span>
-    `;
-
-  } else {
-
-    amountHTML = `
-      <strong>
-        ${formatMoney(expense.amount)}
-      </strong>
-    `;
-
-  }
-
-
-  const statusClass =
-    expense.paid
-      ? "paid"
-      : expense.type === "debt"
-        ? "debt"
-        : "pending";
-
-
-  const statusText =
-    expense.paid
-      ? "Pagado"
-      : expense.type === "debt"
-        ? "Deuda"
-        : "Pendiente";
-
+  const statusClass = expense.paid ? "paid" : expense.type === "debt" ? "debt" : "pending";
+  const statusText = expense.paid ? "Pagado" : expense.type === "debt" ? "Deuda" : "Pendiente";
 
   article.innerHTML = `
-
-    <div class="expense-icon">
-      ${icon}
-    </div>
-
+    <div class="expense-icon">${icon}</div>
 
     <div class="expense-info">
-
-      <h3>
-        ${escapeHTML(expense.description)}
-      </h3>
-
-      <p>
-        ${category}
-        · Cantidad: ${expense.quantity}
-      </p>
-
-      ${
-        expense.notes
-          ? `<p>${escapeHTML(expense.notes)}</p>`
-          : ""
-      }
-
-      <span class="badge ${statusClass}">
-        ${statusText}
-      </span>
-
+      <h3>${escapeHTML(expense.description)}</h3>
+      <p>${category} · Cantidad: ${expense.quantity}</p>
+      ${expense.notes ? `<p>${escapeHTML(expense.notes)}</p>` : ""}
+      <span class="badge ${statusClass}">${statusText}</span>
     </div>
-
 
     <div class="expense-date">
-
       Pagar
-
-      <strong>
-        ${formatDate(expense.date)}
-      </strong>
-
+      <strong>${formatDate(expense.date)}</strong>
     </div>
-
 
     <div class="expense-amount">
-
       ${amountHTML}
-
-
       <div class="actions">
-
         ${
           !expense.paid
-            ? `
-              <button
-                class="action-button pay"
-                title="Marcar como pagado"
-                onclick="markAsPaid('${expense.id}')"
-              >
-                ✓
-              </button>
-            `
+            ? `<button class="action-button pay" title="Marcar como pagado" data-action="pay" data-id="${expense.id}">✓</button>`
             : ""
         }
-
-
-        <button
-          class="action-button"
-          title="Editar"
-          onclick="editExpense('${expense.id}')"
-        >
-          ✏️
-        </button>
-
-
-        <button
-          class="action-button delete"
-          title="Eliminar"
-          onclick="deleteExpense('${expense.id}')"
-        >
-          🗑️
-        </button>
-
+        <button class="action-button" title="Editar" data-action="edit" data-id="${expense.id}">✏️</button>
+        <button class="action-button delete" title="Eliminar" data-action="delete" data-id="${expense.id}">🗑️</button>
       </div>
-
     </div>
-
   `;
 
+  article.querySelectorAll("button[data-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if (action === "pay") markAsPaid(id);
+      if (action === "edit") editExpense(id);
+      if (action === "delete") deleteExpense(id);
+    });
+  });
 
   return article;
-
 }
 
 
 // ==========================================
-// EDITAR
+// ACCIONES
 // ==========================================
 
 function editExpense(id) {
-
-  const expense =
-    expenses.find(
-      item => item.id === id
-    );
-
-
+  const expense = expenses.find(item => item.id === id);
   if (!expense) return;
 
+  $("expenseId").value = expense.id;
+  $("description").value = expense.description;
+  $("category").value = expense.category;
+  $("amount").value = expense.amount === null ? "" : expense.amount;
+  $("quantity").value = expense.quantity;
+  $("date").value = expense.date;
+  $("notes").value = expense.notes || "";
 
-  document.getElementById("expenseId")
-    .value = expense.id;
+  const radio = document.querySelector(`input[name="type"][value="${expense.type}"]`);
+  if (radio) radio.checked = true;
 
-
-  document.getElementById("description")
-    .value = expense.description;
-
-
-  document.getElementById("category")
-    .value = expense.category;
-
-
-  document.getElementById("amount")
-    .value =
-      expense.amount === null
-        ? ""
-        : expense.amount;
-
-
-  document.getElementById("quantity")
-    .value = expense.quantity;
-
-
-  document.getElementById("date")
-    .value = expense.date;
-
-
-  document.getElementById("notes")
-    .value = expense.notes || "";
-
-
-  const radio =
-    document.querySelector(
-      `input[name="type"][value="${expense.type}"]`
-    );
-
-
-  if (radio) {
-    radio.checked = true;
-  }
-
-
-  document.getElementById("modalTitle")
-    .textContent =
-      "Editar registro";
-
-
+  $("modalTitle").textContent = "Editar registro";
   openModal();
-
 }
-
-
-// ==========================================
-// MARCAR PAGADO
-// ==========================================
 
 function markAsPaid(id) {
-
-  const expense =
-    expenses.find(
-      item => item.id === id
-    );
-
-
+  const expense = expenses.find(item => item.id === id);
   if (!expense) return;
-
 
   expense.paid = true;
-
-
   saveData();
-
   render();
-
 }
 
-
-// ==========================================
-// ELIMINAR
-// ==========================================
-
 function deleteExpense(id) {
-
-  const expense =
-    expenses.find(
-      item => item.id === id
-    );
-
-
+  const expense = expenses.find(item => item.id === id);
   if (!expense) return;
 
-
-  const confirmed =
-    confirm(
-      `¿Querés eliminar "${expense.description}"?`
-    );
-
-
+  const confirmed = confirm(`¿Querés eliminar "${expense.description}"?`);
   if (!confirmed) return;
 
-
-  expenses =
-    expenses.filter(
-      item => item.id !== id
-    );
-
-
+  expenses = expenses.filter(item => item.id !== id);
   saveData();
-
   render();
-
 }
 
 
@@ -812,211 +494,62 @@ function deleteExpense(id) {
 // ==========================================
 
 function updateSummary() {
+  const pending = expenses.filter(expense => !expense.paid);
+  const total = pending.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+  totalPending.textContent = formatMoney(total);
 
-  const pending =
-    expenses.filter(
-      expense => !expense.paid
-    );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
+  const sevenDays = new Date(today);
+  sevenDays.setDate(sevenDays.getDate() + 7);
 
-  const total =
-    pending.reduce(
-      (sum, expense) => {
+  const nextTotal = pending
+    .filter(expense => {
+      const date = new Date(`${expense.date}T00:00:00`);
+      return date >= today && date <= sevenDays;
+    })
+    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-        return sum +
-          (expense.amount || 0);
+  nextSevenDays.textContent = formatMoney(nextTotal);
 
-      },
-      0
-    );
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
 
+  const monthTotal = pending
+    .filter(expense => {
+      const date = new Date(`${expense.date}T00:00:00`);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    })
+    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-  totalPending.textContent =
-    formatMoney(total);
+  thisMonth.textContent = formatMoney(monthTotal);
 
+  const debts = pending
+    .filter(expense => expense.type === "debt")
+    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-  // ----------------------------------------
-  // PRÓXIMOS 7 DÍAS
-  // ----------------------------------------
-
-  const today =
-    new Date();
-
-  today.setHours(
-    0, 0, 0, 0
-  );
-
-
-  const sevenDays =
-    new Date(today);
-
-  sevenDays.setDate(
-    sevenDays.getDate() + 7
-  );
-
-
-  const nextTotal =
-    pending
-      .filter(expense => {
-
-        const date =
-          new Date(
-            `${expense.date}T00:00:00`
-          );
-
-        return (
-          date >= today &&
-          date <= sevenDays
-        );
-
-      })
-      .reduce(
-        (sum, expense) =>
-          sum + (expense.amount || 0),
-        0
-      );
-
-
-  nextSevenDays.textContent =
-    formatMoney(nextTotal);
-
-
-  // ----------------------------------------
-  // ESTE MES
-  // ----------------------------------------
-
-  const currentMonth =
-    today.getMonth();
-
-  const currentYear =
-    today.getFullYear();
-
-
-  const monthTotal =
-    pending
-      .filter(expense => {
-
-        const date =
-          new Date(
-            `${expense.date}T00:00:00`
-          );
-
-        return (
-          date.getMonth() === currentMonth &&
-          date.getFullYear() === currentYear
-        );
-
-      })
-      .reduce(
-        (sum, expense) =>
-          sum + (expense.amount || 0),
-        0
-      );
-
-
-  thisMonth.textContent =
-    formatMoney(monthTotal);
-
-
-  // ----------------------------------------
-  // DEUDAS
-  // ----------------------------------------
-
-  const debts =
-    pending
-      .filter(
-        expense =>
-          expense.type === "debt"
-      )
-      .reduce(
-        (sum, expense) =>
-          sum + (expense.amount || 0),
-        0
-      );
-
-
-  totalDebts.textContent =
-    formatMoney(debts);
-
+  totalDebts.textContent = formatMoney(debts);
 }
-
-
-// ==========================================
-// CONTADOR
-// ==========================================
 
 function updateCounter(count) {
-
-  itemsCount.textContent =
-    `${count} ${
-      count === 1
-        ? "registro"
-        : "registros"
-    }`;
-
+  itemsCount.textContent = `${count} ${count === 1 ? "registro" : "registros"}`;
 }
 
-
-// ==========================================
-// FILTROS
-// ==========================================
-
-document
-  .querySelectorAll(".filter")
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        document
-          .querySelectorAll(".filter")
-          .forEach(
-            btn =>
-              btn.classList.remove("active")
-          );
-
-
-        button.classList.add("active");
-
-
-        currentFilter =
-          button.dataset.filter;
-
-
-        renderExpenses();
-
-      }
-    );
-
+document.querySelectorAll(".filter").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".filter").forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+    currentFilter = button.dataset.filter;
+    renderExpenses();
   });
-
-
-// ==========================================
-// ESCAPE HTML
-// ==========================================
+});
 
 function escapeHTML(value) {
-
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-
 }
-
-
-// ==========================================
-// DISPONIBLE GLOBALMENTE
-// ==========================================
-
-window.editExpense =
-  editExpense;
-
-window.deleteExpense =
-  deleteExpense;
-
-window.markAsPaid =
-  markAsPaid;
