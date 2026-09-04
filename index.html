@@ -59,55 +59,20 @@
         <p>Todo lo que tengo que pagar, recordar o debo.</p>
       </div>
 
-      <div class="header-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
-        <!-- APP PRINCIPAL -->
+      <div class="header-actions">
+        <span id="userEmail" class="user-email"></span>
+
         <a 
           href="https://gastosmensuales-git-main-florrbs-projects.vercel.app/" 
-          class="secondary-button"
-          style="text-decoration: none !important; display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--pink-dark);"
+          class="secondary-button back-link"
         >
           💗 Ir a MENSUALES
         </a>
 
-        <!-- OCULTAR MONTOS -->
-        <button 
-          class="secondary-button" 
-          id="toggleAmountsBtn" 
-          type="button"
-          style="padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap;"
-        >
-          👁️ Montos
-        </button>
-
-        <!-- REPORTE PDF -->
-        <button 
-          class="secondary-button" 
-          id="pdfBtn" 
-          type="button"
-          style="padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap;"
-        >
-          📄 PDF
-        </button>
-
-        <!-- ACCIÓN PRINCIPAL DESTACADA -->
-        <button 
-          class="primary-button" 
-          id="openModalBtn"
-          style="padding: 10px 18px; font-size: 13px; font-weight: 700; white-space: nowrap;"
-        >
-          ＋ Agregar
-        </button>
-
-        <!-- CERRAR SESIÓN -->
-        <button 
-          class="secondary-button" 
-          id="logoutBtn" 
-          type="button" 
-          title="Cerrar sesión"
-          style="padding: 10px 12px; font-size: 13px; font-weight: 700; color: var(--muted);"
-        >
-          ✕
-        </button>
+        <button class="secondary-button" id="toggleAmountsBtn" type="button">👁️ Ocultar montos</button>
+        <button class="secondary-button" id="pdfBtn" type="button">📄 PDF</button>
+        <button class="primary-button" id="openModalBtn">＋ Agregar</button>
+        <button class="secondary-button" id="logoutBtn" type="button">Cerrar sesión</button>
       </div>
     </header>
 
