@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gastos Próximos</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <body>
 
   <!-- ==============================
@@ -58,31 +59,54 @@
         <p>Todo lo que tengo que pagar, recordar o debo.</p>
       </div>
 
-      <div class="header-actions">
+      <div class="header-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
         <!-- APP PRINCIPAL -->
         <a 
           href="https://gastosmensuales-git-main-florrbs-projects.vercel.app/" 
-          class="btn-nav-app"
+          class="secondary-button"
+          style="text-decoration: none !important; display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--pink-dark);"
         >
           💗 Ir a MENSUALES
         </a>
 
-        <!-- GRUPO HERRAMIENTAS COMPACTAS -->
-        <div class="actions-group">
-          <button class="icon-action-btn" id="toggleAmountsBtn" type="button" title="Ocultar / Mostrar montos">
-            👁️
-          </button>
-          <button class="icon-action-btn" id="pdfBtn" type="button" title="Descargar reporte PDF">
-            📄
-          </button>
-          <button class="icon-action-btn logout" id="logoutBtn" type="button" title="Cerrar sesión">
-            🚪
-          </button>
-        </div>
+        <!-- OCULTAR MONTOS -->
+        <button 
+          class="secondary-button" 
+          id="toggleAmountsBtn" 
+          type="button"
+          style="padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap;"
+        >
+          👁️ Montos
+        </button>
+
+        <!-- REPORTE PDF -->
+        <button 
+          class="secondary-button" 
+          id="pdfBtn" 
+          type="button"
+          style="padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap;"
+        >
+          📄 PDF
+        </button>
 
         <!-- ACCIÓN PRINCIPAL DESTACADA -->
-        <button class="primary-button add-main-btn" id="openModalBtn">
+        <button 
+          class="primary-button" 
+          id="openModalBtn"
+          style="padding: 10px 18px; font-size: 13px; font-weight: 700; white-space: nowrap;"
+        >
           ＋ Agregar
+        </button>
+
+        <!-- CERRAR SESIÓN -->
+        <button 
+          class="secondary-button" 
+          id="logoutBtn" 
+          type="button" 
+          title="Cerrar sesión"
+          style="padding: 10px 12px; font-size: 13px; font-weight: 700; color: var(--muted);"
+        >
+          ✕
         </button>
       </div>
     </header>
