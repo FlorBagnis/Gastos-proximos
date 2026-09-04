@@ -214,6 +214,46 @@ Brindar una herramienta clara, visual y rápida para responder las preguntas ese
 
 💳 Seguimiento de cuotas restantes por compra.
 
+# 💗 MENSUALES — Control de Presupuesto & Finanzas Personales
+
+Aplicación web progresiva e intuitiva diseñada para el seguimiento mensual de gastos personales, presupuestos, proyecciones y análisis de hábitos financieros.
+
+---
+
+## 🚀 Novedades: Ecosistema Integrado con "Gastos Próximos" 🌸
+
+Se integró **MENSUALES** con la aplicación complementaria **[Gastos Próximos](https://gastos-proximos.vercel.app/)** (agenda de vencimientos, pagos a realizar y deudas), creando un flujo financiero unificado bajo el mismo proyecto de Firebase.
+
+### 🔗 Acceso Rápido entre Aplicaciones
+* Se añadió un **botón directo de navegación en la cabecera** de ambas aplicaciones que permite alternar entre **MENSUALES** y **Gastos Próximos** al instante y en la misma pestaña, sin abrir ventanas adicionales ni perder contexto.
+
+---
+
+## 📄 Exportación de Reportes en PDF (Ambas Apps)
+
+<img width="893" height="270" alt="image" src="https://github.com/user-attachments/assets/9b9565f4-4a01-4f19-87fb-be5f92a8d8fe" />
+
+<img width="970" height="187" alt="image" src="https://github.com/user-attachments/assets/b5c54ad4-961f-4d1e-853e-2e38684e9843" />
+
+
+
+Ambas plataformas cuentan con generación instantánea de balances descargables en formato PDF mediante la librería **jsPDF**, manteniendo una identidad visual armónica:
+
+* **En MENSUALES:** Genera el balance contable mensual comparativo con respecto al mes anterior, distribución por categorías y análisis de tendencias.
+* **En Gastos Próximos:** Se incorporó el botón **`📄 PDF`** en la barra superior para exportar un reporte con:
+  * Tarjetas de resumen: **Total Pendiente**, **Total en Deudas** y cantidad de ítems pendientes.
+  * Tabla cronológica detallada con fecha, concepto, categoría, estado y monto a pagar.
+  * Cálculo del total final de compromisos pendientes para llevar un control impreso o archivarlo digitalmente.
+
+---
+
+## 🔄 Flujo de Sincronización Bidireccional en Tiempo Real
+
+Ambas aplicaciones comparten la misma base de datos en **Cloud Firestore** y el mismo sistema de credenciales en **Firebase Authentication**. Esto habilita una sincronización inteligente y automática:
+
+
+
+
 👩‍💻 Autora
 Florencia Bagnis
 
