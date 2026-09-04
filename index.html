@@ -59,20 +59,31 @@
       </div>
 
       <div class="header-actions">
-        <span id="userEmail" class="user-email"></span>
-
-        <!-- ENLACE A MENSUALES -->
+        <!-- APP PRINCIPAL -->
         <a 
-          href="https://gastosmensuales-two.vercel.app/" 
-          class="secondary-button back-link"
+          href="https://gastosmensuales-git-main-florrbs-projects.vercel.app/" 
+          class="btn-nav-app"
         >
           💗 Ir a MENSUALES
         </a>
 
-        <button class="secondary-button" id="toggleAmountsBtn" type="button">👁️ Ocultar montos</button>
-        <button class="primary-button" id="openModalBtn">＋ Agregar</button>
-        <button class="secondary-button" id="pdfBtn" type="button">📄 Descargar PDF</button>
-        <button class="secondary-button" id="logoutBtn" type="button">Cerrar sesión</button>
+        <!-- GRUPO HERRAMIENTAS COMPACTAS -->
+        <div class="actions-group">
+          <button class="icon-action-btn" id="toggleAmountsBtn" type="button" title="Ocultar / Mostrar montos">
+            👁️
+          </button>
+          <button class="icon-action-btn" id="pdfBtn" type="button" title="Descargar reporte PDF">
+            📄
+          </button>
+          <button class="icon-action-btn logout" id="logoutBtn" type="button" title="Cerrar sesión">
+            🚪
+          </button>
+        </div>
+
+        <!-- ACCIÓN PRINCIPAL DESTACADA -->
+        <button class="primary-button add-main-btn" id="openModalBtn">
+          ＋ Agregar
+        </button>
       </div>
     </header>
 
