@@ -644,3 +644,129 @@ function escapeHTML(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// ==========================================
+// EXPORTAR REPORTE A PDF
+// ==========================================
+
+$("pdfBtn")?.addEventListener("click", () => {
+  if (!window.jspdf) {
+    alert("No se pudo cargar la librería para generar el PDF.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+
+  const pink = [232, 93, 158];      // #e85d9e
+  const dark = [51, 41, 52];        // #332934
+  const light = [255, 240, 247];    // #fff0f7
+
+  // Cabecera rosa principal
+  pdf.setFillColor(255, 227, 240);
+  pdf.roundedRect(15, 15, 180, 26, 4, 4, "F");
+
+  pdf.setTextColor(...dark);
+  pdf.setFontSize(16);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("AGENDA DE GASTOS PRÓXIMOS", 21, 26);
+
+  const todayStr = new Date().toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
+
+  pdf.setFontSize(8);
+  pdf.setFont("helvetica", "normal");
+  pdf.text(`Reporte emitido el ${todayStr}`, 21, 33);
+
+  // Cálculos de resumen
+  const pendingItems = expenses.filter(e => !e.paid);
+  const totalPendingVal = pendingItems.reduce((acc, e) => acc + (e.amount || 0), 0);
+  const totalDebtsVal = pendingItems.filter(e => e.type === "debt").reduce((acc, e) => acc + (e.amount || 0), 0);
+
+  const cards = [
+    ["PENDIENTE TOTAL", formatMoney(totalPendingVal)],
+    ["DEUDAS", formatMoney(totalDebtsVal)],
+    ["ITEMS PENDIENTES", `${pendingItems.length}`]
+  ];
+
+  cards.forEach((card, index) => {
+    const x = 15 + index * 60;
+    pdf.setDrawColor(240, 223, 232);
+    pdf.roundedRect(x, 46, 56, 22, 3, 3, "S");
+
+    pdf.setTextColor(...pink);
+    pdf.setFontSize(7);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(card[0], x + 4, 53);
+
+    pdf.setTextColor(...dark);
+    pdf.setFontSize(11);
+    pdf.text(card[1], x + 4, 62);
+  });
+
+  // Encabezados de tabla
+  let y = 76;
+  pdf.setFillColor(...pink);
+  pdf.rect(15, y, 180, 7, "F");
+
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(7);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("FECHA", 18, y + 5);
+  pdf.text("CONCEPTO / DETALLE", 42, y + 5);
+  pdf.text("CATEGORÍA", 118, y + 5);
+  pdf.text("ESTADO", 148, y + 5);
+  pdf.text("MONTO", 175, y + 5);
+
+  y += 7;
+  pdf.setFont("helvetica", "normal");
+
+  // Ordenar cronológicamente
+  const sortedExpenses = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  sortedExpenses.forEach(expense => {
+    if (y > 275) {
+      pdf.addPage();
+      y = 20;
+    }
+
+    const state = expense.paid ? "Pagado" : expense.type === "debt" ? "Deuda" : "Pendiente";
+    const amountStr = expense.amount !== null ? formatMoney(expense.amount) : "A definir";
+
+    pdf.setTextColor(...dark);
+    pdf.setFontSize(7);
+    pdf.text(formatDate(expense.date), 18, y + 5);
+    pdf.text(String(expense.description || "").slice(0, 38), 42, y + 5);
+    pdf.text(getCategoryName(expense.category), 118, y + 5);
+    pdf.text(state, 148, y + 5);
+    pdf.text(amountStr, 175, y + 5);
+
+    pdf.setDrawColor(245, 230, 238);
+    pdf.line(15, y + 8, 195, y + 8);
+    y += 9;
+  });
+
+  // Subtotal al final
+  if (y > 265) {
+    pdf.addPage();
+    y = 20;
+  }
+
+  pdf.setFillColor(...light);
+  pdf.rect(15, y, 180, 9, "F");
+  pdf.setTextColor(...dark);
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(7);
+  pdf.text("TOTAL PENDIENTE DE PAGO", 18, y + 6);
+  pdf.text(formatMoney(totalPendingVal), 175, y + 6);
+
+  // Pie de página
+  pdf.setFontSize(7);
+  pdf.setTextColor(160, 140, 150);
+  pdf.text("Gastos Próximos · Reporte generado automáticamente", 15, 287);
+
+  pdf.save(`Gastos-Proximos-${new Date().toISOString().slice(0, 10)}.pdf`);
+});
