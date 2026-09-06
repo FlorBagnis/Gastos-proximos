@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   ESTILO ROSA · RESPONSIVE
+   ESTILO ROSA · RESPONSIVE + MODO OSCURO
 ========================================== */
 
 * {
@@ -824,7 +824,7 @@ body.amounts-hidden .expense-amount strong::after {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: nowrap; /* Evita que los botones se caigan de fila */
+  flex-wrap: nowrap;
 }
 
 /* Botón a MENSUALES */
@@ -890,4 +890,177 @@ body.amounts-hidden .expense-amount strong::after {
   padding: 11px 20px;
   border-radius: 12px;
   white-space: nowrap;
+}
+
+
+/* ==========================================
+   MODO OSCURO (Dark Aesthetic Pink)
+========================================== */
+body.dark-mode {
+  background: #140e13;
+  color: #fceef3;
+}
+
+body.dark-mode .auth-card,
+body.dark-mode .summary-card,
+body.dark-mode .expense,
+body.dark-mode .modal,
+body.dark-mode .empty-state {
+  background: #211620;
+  border-color: #3b2334;
+  color: #fceef3;
+}
+
+body.dark-mode .main-card {
+  background: linear-gradient(135deg, #2b1825, #211620);
+}
+
+body.dark-mode .header h1 {
+  color: #ffdbe4;
+}
+
+body.dark-mode .header p,
+body.dark-mode .user-email {
+  color: #e5a7be;
+}
+
+body.dark-mode .eyebrow {
+  color: #ff9db4;
+}
+
+body.dark-mode .summary-card span,
+body.dark-mode .section-title span,
+body.dark-mode .expense-info p,
+body.dark-mode .expense-date,
+body.dark-mode .auth-subtitle,
+body.dark-mode .modal-header p,
+body.dark-mode .helper,
+body.dark-mode footer {
+  color: #b893a4;
+}
+
+body.dark-mode .expense-date strong {
+  color: #ffdbe4;
+}
+
+body.dark-mode .card-icon,
+body.dark-mode .small-icon,
+body.dark-mode .expense-icon,
+body.dark-mode .modal-icon,
+body.dark-mode .auth-logo {
+  background: #331d2b;
+  color: #ff9db4;
+}
+
+body.dark-mode .close-modal {
+  background: #2b1c2a;
+  color: #e5a7be;
+}
+
+body.dark-mode .close-modal:hover {
+  background: #3d233a;
+  color: #ffffff;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .money-input {
+  background: #170f16;
+  border-color: #3b2334;
+  color: #fceef3;
+}
+
+body.dark-mode .money-input span {
+  color: #ff9db4;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(232, 93, 158, 0.2);
+}
+
+body.dark-mode .secondary-button,
+body.dark-mode .btn-nav-app,
+body.dark-mode .actions-group {
+  background: #211620;
+  color: #ff9db4;
+  border-color: #592e47;
+}
+
+body.dark-mode .secondary-button:hover,
+body.dark-mode .btn-nav-app:hover {
+  background: #331d2b;
+  border-color: #e85d9e;
+  color: #ffdbe4;
+}
+
+body.dark-mode .icon-action-btn:hover {
+  background: #331d2b;
+}
+
+body.dark-mode .icon-action-btn.logout:hover {
+  background: #3d1b24;
+}
+
+body.dark-mode .filter {
+  background: #211620;
+  border-color: #3b2334;
+  color: #b893a4;
+}
+
+body.dark-mode .filter:hover {
+  border-color: #592e47;
+  color: #ffdbe4;
+}
+
+body.dark-mode .filter.active {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #ffffff;
+}
+
+body.dark-mode .action-button {
+  background: #2b1c2a;
+  border-color: #592e47;
+  color: #fceef3;
+}
+
+body.dark-mode .action-button:hover {
+  background: #3d233a;
+}
+
+body.dark-mode .type-option span {
+  border-color: #3b2334;
+  background: #191118;
+}
+
+body.dark-mode .type-option input:checked + span {
+  border-color: var(--pink);
+  background: #301726;
+}
+
+body.dark-mode .type-option small {
+  color: #b893a4;
+}
+
+body.dark-mode .badge.debt {
+  background: #3d1b2e;
+  color: #ffb0c2;
+}
+
+body.dark-mode .empty-state h3 {
+  color: #ffdbe4;
+}
+
+body.dark-mode.amounts-hidden #totalPending::after,
+body.dark-mode.amounts-hidden #nextSevenDays::after,
+body.dark-mode.amounts-hidden #thisMonth::after,
+body.dark-mode.amounts-hidden #totalDebts::after,
+body.dark-mode.amounts-hidden .expense-amount strong::after,
+body.dark-mode.amounts-hidden #amount::after {
+  color: #ff9db4 !important;
+  background-color: transparent;
 }
