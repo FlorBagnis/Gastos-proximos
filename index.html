@@ -11,8 +11,8 @@
 
 <body>
 
- <!-- ==============================
-       AUTENTICACIÓN (LOGIN / REGISTRO)
+  <!-- ==============================
+        AUTENTICACIÓN (LOGIN / REGISTRO)
   =============================== -->
   <section id="authSection" class="auth-section hidden">
     <div class="auth-card">
@@ -20,8 +20,7 @@
       <span class="eyebrow">MI ORGANIZACIÓN 💗</span>
       <h1>Gastos Próximos</h1>
       <p class="auth-subtitle">Ingresá con tu misma cuenta de MENSUALES para sincronizar todo.</p>
-   
-   
+    
       <form id="authForm">
         <label>
           Email
@@ -48,7 +47,7 @@
 
 
   <!-- ==============================
-       APLICACIÓN PRINCIPAL
+        APLICACIÓN PRINCIPAL
   =============================== -->
   <div class="app hidden" id="appContent">
 
@@ -207,18 +206,26 @@
           </select>
         </div>
 
-        <!-- MONTO + CANTIDAD -->
-        <div class="form-row">
-          <div class="form-group">
+        <!-- MONTO + MONEDA + CANTIDAD -->
+        <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; align-items: start;">
+          <div class="form-group" style="margin-bottom: 0;">
             <label for="amount">Monto</label>
             <div class="money-input">
-              <span>$</span>
+              <span id="currencySymbol">$</span>
               <input type="number" id="amount" min="0" step="0.01" placeholder="0">
             </div>
-            <small class="helper">Podés dejarlo vacío si todavía no sabés el monto.</small>
+            <small class="helper">Podés dejarlo vacío si aún no lo sabés.</small>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="currency">Moneda</label>
+            <select id="currency">
+              <option value="ARS" selected>ARS ($)</option>
+              <option value="USD">USD (u$s)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
             <label for="quantity">Cantidad</label>
             <input type="number" id="quantity" min="1" value="1">
           </div>
