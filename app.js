@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES
+   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + MODO OSCURO
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -218,9 +218,30 @@ onAuthStateChanged(auth, user => {
 
   setDefaultDate();
   setupAmountsToggle();
+  setupThemeToggle();
   setupCurrencyIndicator();
   startFirestoreSync();
 });
+
+
+// MODO OSCURO CON LOCALSTORAGE
+function setupThemeToggle() {
+  const toggleThemeBtn = $("toggleThemeBtn");
+  const isDark = localStorage.getItem("gastos_proximos_theme") === "dark";
+
+  if (isDark) {
+    document.body.classList.add("dark-mode");
+    if (toggleThemeBtn) toggleThemeBtn.textContent = "☀️ Modo claro";
+  }
+
+  if (toggleThemeBtn) {
+    toggleThemeBtn.onclick = () => {
+      const activeDark = document.body.classList.toggle("dark-mode");
+      localStorage.setItem("gastos_proximos_theme", activeDark ? "dark" : "light");
+      toggleThemeBtn.textContent = activeDark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+    };
+  }
+}
 
 
 // SÍMBOLO DINÁMICO SEGÚN SELECTOR
