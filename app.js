@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES
+   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -98,6 +98,7 @@ async function saveExpenseToFirestore(item) {
     description: item.description || "",
     category: item.category || "otros",
     amount: item.amount === null || isNaN(item.amount) ? null : Number(item.amount),
+    currency: item.currency || "ARS",
     quantity: Number(item.quantity) || 1,
     date: item.date || new Date().toISOString().slice(0, 10),
     notes: item.notes || "",
@@ -217,8 +218,21 @@ onAuthStateChanged(auth, user => {
 
   setDefaultDate();
   setupAmountsToggle();
+  setupCurrencyIndicator();
   startFirestoreSync();
 });
+
+
+// SÍMBOLO DINÁMICO SEGÚN SELECTOR
+function setupCurrencyIndicator() {
+  const curSelect = $("currency");
+  const curSymbol = $("currencySymbol");
+  if (!curSelect || !curSymbol) return;
+
+  curSelect.addEventListener("change", () => {
+    curSymbol.textContent = curSelect.value === "USD" ? "u$s" : "$";
+  });
+}
 
 
 // OCULTAR / MOSTRAR MONTOS
@@ -253,6 +267,8 @@ function closeModal() {
   modal.classList.remove("show");
   expenseForm.reset();
   $("expenseId").value = "";
+  if ($("currency")) $("currency").value = "ARS";
+  if ($("currencySymbol")) $("currencySymbol").textContent = "$";
   $("modalTitle").textContent = "Agregar registro";
   setDefaultDate();
 }
@@ -286,6 +302,7 @@ expenseForm.addEventListener("submit", async event => {
   const description = $("description").value.trim();
   const category = $("category").value;
   const amountValue = $("amount").value;
+  const currency = $("currency") ? $("currency").value : "ARS";
   const quantity = Number($("quantity").value) || 1;
   const date = $("date").value;
   const notes = $("notes").value.trim();
@@ -299,6 +316,7 @@ expenseForm.addEventListener("submit", async event => {
     description,
     category,
     amount,
+    currency,
     quantity,
     date,
     notes,
@@ -316,14 +334,25 @@ expenseForm.addEventListener("submit", async event => {
 });
 
 
-// FORMATEADORES & MAPEOS
-function formatMoney(value) {
+// FORMATEADORES & MAPEOS MULTIMONEDA
+function formatMoney(value, currency = "ARS") {
   if (value === null || value === undefined || isNaN(value)) return null;
+  const isUSD = currency === "USD";
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0
+    currency: isUSD ? "USD" : "ARS",
+    maximumFractionDigits: isUSD ? 2 : 0
   }).format(value);
+}
+
+function renderDualAmount(arsAmount, usdAmount) {
+  if (usdAmount > 0 && arsAmount > 0) {
+    return `${formatMoney(arsAmount)} <small style="display:block; font-size:0.8rem; font-weight:normal; color:#e85d9e;">${formatMoney(usdAmount, "USD")}</small>`;
+  }
+  if (usdAmount > 0) {
+    return formatMoney(usdAmount, "USD");
+  }
+  return formatMoney(arsAmount);
 }
 
 function formatDate(dateString) {
@@ -423,10 +452,11 @@ function createExpenseElement(expense) {
 
   const icon = getCategoryIcon(expense.category);
   const category = getCategoryName(expense.category);
+  const curr = expense.currency || "ARS";
 
   const amountHTML = expense.amount === null
     ? `<span class="no-amount">Monto pendiente</span>`
-    : `<strong>${formatMoney(expense.amount)}</strong>`;
+    : `<strong>${formatMoney(expense.amount, curr)}</strong>`;
 
   const statusClass = expense.paid ? "paid" : expense.type === "debt" ? "debt" : "pending";
   const statusText = expense.paid ? "Pagado" : expense.type === "debt" ? "Deuda" : "Pendiente";
@@ -484,6 +514,12 @@ function editExpense(id) {
   $("description").value = expense.description;
   $("category").value = expense.category;
   $("amount").value = expense.amount === null ? "" : expense.amount;
+  if ($("currency")) {
+    $("currency").value = expense.currency || "ARS";
+    if ($("currencySymbol")) {
+      $("currencySymbol").textContent = expense.currency === "USD" ? "u$s" : "$";
+    }
+  }
   $("quantity").value = expense.quantity;
   $("date").value = expense.date;
   $("notes").value = expense.notes || "";
@@ -529,7 +565,8 @@ async function markAsPaid(id) {
       date: payDate,
       description: expense.description,
       category: mapCategoryToMensuales(expense.category),
-      amount: Number(expense.amount)
+      amount: Number(expense.amount),
+      currency: expense.currency || "ARS"
     };
 
     monthData.expenses = monthData.expenses.filter(e => e.id !== mensualId);
@@ -583,11 +620,18 @@ async function deleteExpense(id) {
 }
 
 
-// RESUMEN
+// RESUMEN CON DESGLOSE DUAL (ARS / USD)
 function updateSummary() {
   const pending = expenses.filter(expense => !expense.paid);
-  const total = pending.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-  totalPending.textContent = formatMoney(total);
+
+  let totalPendingARS = 0;
+  let totalPendingUSD = 0;
+  pending.forEach(e => {
+    const amt = Number(e.amount || 0);
+    if (e.currency === "USD") totalPendingUSD += amt;
+    else totalPendingARS += amt;
+  });
+  totalPending.innerHTML = renderDualAmount(totalPendingARS, totalPendingUSD);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -595,32 +639,47 @@ function updateSummary() {
   const sevenDays = new Date(today);
   sevenDays.setDate(sevenDays.getDate() + 7);
 
-  const nextTotal = pending
+  let nextARS = 0;
+  let nextUSD = 0;
+  pending
     .filter(expense => {
       const date = new Date(`${expense.date}T00:00:00`);
       return date >= today && date <= sevenDays;
     })
-    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
-
-  nextSevenDays.textContent = formatMoney(nextTotal);
+    .forEach(e => {
+      const amt = Number(e.amount || 0);
+      if (e.currency === "USD") nextUSD += amt;
+      else nextARS += amt;
+    });
+  nextSevenDays.innerHTML = renderDualAmount(nextARS, nextUSD);
 
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
 
-  const monthTotal = pending
+  let monthARS = 0;
+  let monthUSD = 0;
+  pending
     .filter(expense => {
       const date = new Date(`${expense.date}T00:00:00`);
       return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
     })
-    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+    .forEach(e => {
+      const amt = Number(e.amount || 0);
+      if (e.currency === "USD") monthUSD += amt;
+      else monthARS += amt;
+    });
+  thisMonth.innerHTML = renderDualAmount(monthARS, monthUSD);
 
-  thisMonth.textContent = formatMoney(monthTotal);
-
-  const debts = pending
+  let debtsARS = 0;
+  let debtsUSD = 0;
+  pending
     .filter(expense => expense.type === "debt")
-    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
-
-  totalDebts.textContent = formatMoney(debts);
+    .forEach(e => {
+      const amt = Number(e.amount || 0);
+      if (e.currency === "USD") debtsUSD += amt;
+      else debtsARS += amt;
+    });
+  totalDebts.innerHTML = renderDualAmount(debtsARS, debtsUSD);
 }
 
 function updateCounter(count) {
@@ -683,12 +742,29 @@ $("pdfBtn")?.addEventListener("click", () => {
 
   // Cálculos de resumen
   const pendingItems = expenses.filter(e => !e.paid);
-  const totalPendingVal = pendingItems.reduce((acc, e) => acc + (e.amount || 0), 0);
-  const totalDebtsVal = pendingItems.filter(e => e.type === "debt").reduce((acc, e) => acc + (e.amount || 0), 0);
+
+  let totalPendingARS = 0;
+  let totalPendingUSD = 0;
+  let debtsARS = 0;
+  let debtsUSD = 0;
+
+  pendingItems.forEach(e => {
+    const amt = Number(e.amount || 0);
+    if (e.currency === "USD") {
+      totalPendingUSD += amt;
+      if (e.type === "debt") debtsUSD += amt;
+    } else {
+      totalPendingARS += amt;
+      if (e.type === "debt") debtsARS += amt;
+    }
+  });
+
+  const strPending = totalPendingUSD > 0 ? `${formatMoney(totalPendingARS)} + ${formatMoney(totalPendingUSD, "USD")}` : formatMoney(totalPendingARS);
+  const strDebts = debtsUSD > 0 ? `${formatMoney(debtsARS)} + ${formatMoney(debtsUSD, "USD")}` : formatMoney(debtsARS);
 
   const cards = [
-    ["PENDIENTE TOTAL", formatMoney(totalPendingVal)],
-    ["DEUDAS", formatMoney(totalDebtsVal)],
+    ["PENDIENTE TOTAL", strPending],
+    ["DEUDAS", strDebts],
     ["ITEMS PENDIENTES", `${pendingItems.length}`]
   ];
 
@@ -703,7 +779,7 @@ $("pdfBtn")?.addEventListener("click", () => {
     pdf.text(card[0], x + 4, 53);
 
     pdf.setTextColor(...dark);
-    pdf.setFontSize(11);
+    pdf.setFontSize(9);
     pdf.text(card[1], x + 4, 62);
   });
 
@@ -717,9 +793,9 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.setFont("helvetica", "bold");
   pdf.text("FECHA", 18, y + 5);
   pdf.text("CONCEPTO / DETALLE", 42, y + 5);
-  pdf.text("CATEGORÍA", 118, y + 5);
-  pdf.text("ESTADO", 148, y + 5);
-  pdf.text("MONTO", 175, y + 5);
+  pdf.text("CATEGORÍA", 115, y + 5);
+  pdf.text("ESTADO", 145, y + 5);
+  pdf.text("MONTO", 170, y + 5);
 
   y += 7;
   pdf.setFont("helvetica", "normal");
@@ -734,15 +810,16 @@ $("pdfBtn")?.addEventListener("click", () => {
     }
 
     const state = expense.paid ? "Pagado" : expense.type === "debt" ? "Deuda" : "Pendiente";
-    const amountStr = expense.amount !== null ? formatMoney(expense.amount) : "A definir";
+    const curr = expense.currency || "ARS";
+    const amountStr = expense.amount !== null ? formatMoney(expense.amount, curr) : "A definir";
 
     pdf.setTextColor(...dark);
     pdf.setFontSize(7);
     pdf.text(formatDate(expense.date), 18, y + 5);
     pdf.text(String(expense.description || "").slice(0, 38), 42, y + 5);
-    pdf.text(getCategoryName(expense.category), 118, y + 5);
-    pdf.text(state, 148, y + 5);
-    pdf.text(amountStr, 175, y + 5);
+    pdf.text(getCategoryName(expense.category), 115, y + 5);
+    pdf.text(state, 145, y + 5);
+    pdf.text(amountStr, 170, y + 5);
 
     pdf.setDrawColor(245, 230, 238);
     pdf.line(15, y + 8, 195, y + 8);
@@ -761,7 +838,7 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7);
   pdf.text("TOTAL PENDIENTE DE PAGO", 18, y + 6);
-  pdf.text(formatMoney(totalPendingVal), 175, y + 6);
+  pdf.text(strPending, 150, y + 6);
 
   // Pie de página
   pdf.setFontSize(7);
