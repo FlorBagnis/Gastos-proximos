@@ -386,6 +386,7 @@ function formatDate(dateString) {
 }
 
 function getCategoryIcon(category) {
+  const key = String(category || "").toLowerCase();
   const icons = {
     hogar: "🏠",
     servicios: "💡",
@@ -396,12 +397,14 @@ function getCategoryIcon(category) {
     transporte: "🚗",
     otros: "📦",
     gimnasio: "💪",
+    gym: "💪",
     agua: "💧"
   };
-  return icons[category] || "📦";
+  return icons[key] || "📦";
 }
 
 function getCategoryName(category) {
+  const key = String(category || "").toLowerCase();
   const names = {
     hogar: "Hogar",
     servicios: "Servicios",
@@ -412,12 +415,14 @@ function getCategoryName(category) {
     transporte: "Transporte",
     otros: "Otros",
     gimnasio: "Gimnasio",
+    gym: "Gimnasio",
     agua: "Agua"
   };
-  return names[category] || "Otros";
+  return names[key] || "Otros";
 }
 
 function mapCategoryToMensuales(category) {
+  const key = String(category || "").toLowerCase();
   const map = {
     comida: "Alimentos",
     transporte: "Transporte",
@@ -425,12 +430,13 @@ function mapCategoryToMensuales(category) {
     servicios: "Servicios",
     salud: "Salud",
     mascotas: "Mascotas",
-    deudas: "Deudas",
+    deudas: "Otros",
     otros: "Otros",
     gimnasio: "Personal",
+    gym: "Personal",
     agua: "Hogar"
   };
-  return map[category] || "Otros";
+  return map[key] || "Otros";
 }
 
 
