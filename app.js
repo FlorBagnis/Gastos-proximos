@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + MODO OSCURO
+   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + MODO OSCURO + ALERTAS + CSV + BUSCADOR
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -38,6 +38,7 @@ const db = getFirestore(app);
 let currentUser = null;
 let expenses = [];
 let currentFilter = "all";
+let searchQuery = "";
 let authMode = "login";
 let unsubscribeExpenses = null;
 
@@ -58,6 +59,14 @@ const nextSevenDays = $("nextSevenDays");
 const thisMonth = $("thisMonth");
 const totalDebts = $("totalDebts");
 const itemsCount = $("itemsCount");
+
+
+// REGISTRO DE SERVICE WORKER (PWA)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(err => console.log("SW error:", err));
+  });
+}
 
 
 // FIRESTORE SYNC
@@ -116,6 +125,22 @@ async function deleteExpenseFromFirestore(id) {
   if (!currentUser) return;
   const docRef = doc(db, "users", currentUser.uid, "proximos", id);
   await deleteDoc(docRef);
+}
+
+
+// COTIZACIÓN DÓLAR EN VIVO
+async function fetchDolarRate() {
+  const badge = $("dolarBadge");
+  if (!badge) return;
+  try {
+    const res = await fetch("https://dolarapi.com/v1/dolares/blue");
+    const data = await res.json();
+    if (data?.venta) {
+      badge.textContent = `💵 Blue Venta: $${data.venta}`;
+    }
+  } catch (err) {
+    badge.textContent = `💵 Dólar Blue: no disponible`;
+  }
 }
 
 
@@ -220,6 +245,7 @@ onAuthStateChanged(auth, user => {
   setupAmountsToggle();
   setupThemeToggle();
   setupCurrencyIndicator();
+  fetchDolarRate();
   startFirestoreSync();
 });
 
@@ -355,7 +381,7 @@ expenseForm.addEventListener("submit", async event => {
 });
 
 
-// FORMATEADORES & MAPEOS MULTIMONEDA
+// FORMATEADORES & MAPEOS
 function formatMoney(value, currency = "ARS") {
   if (value === null || value === undefined || isNaN(value)) return null;
   const isUSD = currency === "USD";
@@ -383,6 +409,25 @@ function formatDate(dateString) {
     day: "2-digit",
     month: "short"
   }).format(date);
+}
+
+function getDueAlert(dateString, isPaid) {
+  if (isPaid || !dateString) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(`${dateString}T00:00:00`);
+  const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return { text: "⚠️ Vencido", style: "background:#ffebee; color:#d32f2f; border:1px solid #ffcdd2;" };
+  }
+  if (diffDays === 0) {
+    return { text: "⏰ Vence hoy", style: "background:#fff3e0; color:#e65100; border:1px solid #ffe0b2;" };
+  }
+  if (diffDays <= 2) {
+    return { text: "⚡ Próximo", style: "background:#fce4ec; color:#c2185b; border:1px solid #f8bbd0;" };
+  }
+  return null;
 }
 
 function getCategoryIcon(category) {
@@ -457,6 +502,15 @@ function getFilteredExpenses() {
     filtered = filtered.filter(e => e.type === "debt");
   }
 
+  if (searchQuery.trim() !== "") {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(e => 
+      (e.description || "").toLowerCase().includes(q) ||
+      (e.notes || "").toLowerCase().includes(q) ||
+      getCategoryName(e.category).toLowerCase().includes(q)
+    );
+  }
+
   filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
   return filtered;
 }
@@ -494,6 +548,11 @@ function createExpenseElement(expense) {
   const statusClass = expense.paid ? "paid" : expense.type === "debt" ? "debt" : "pending";
   const statusText = expense.paid ? "Pagado" : expense.type === "debt" ? "Deuda" : "Pendiente";
 
+  const dueAlert = getDueAlert(expense.date, expense.paid);
+  const alertHTML = dueAlert 
+    ? `<span class="badge" style="${dueAlert.style}; margin-left: 6px; font-weight: bold;">${dueAlert.text}</span>` 
+    : "";
+
   article.innerHTML = `
     <div class="expense-icon">${icon}</div>
 
@@ -501,7 +560,10 @@ function createExpenseElement(expense) {
       <h3>${escapeHTML(expense.description)}</h3>
       <p>${category} · Cantidad: ${expense.quantity}</p>
       ${expense.notes ? `<p>${escapeHTML(expense.notes)}</p>` : ""}
-      <span class="badge ${statusClass}">${statusText}</span>
+      <div style="margin-top: 4px;">
+        <span class="badge ${statusClass}">${statusText}</span>
+        ${alertHTML}
+      </div>
     </div>
 
     <div class="expense-date">
@@ -536,6 +598,13 @@ function createExpenseElement(expense) {
 
   return article;
 }
+
+
+// BUSCADOR EN VIVO
+$("searchInput")?.addEventListener("input", e => {
+  searchQuery = e.target.value;
+  renderExpenses();
+});
 
 
 // ACCIONES
@@ -737,10 +806,51 @@ function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
+
+// ==========================================
+// EXPORTAR A CSV (EXCEL / SHEETS)
+// ==========================================
+$("csvBtn")?.addEventListener("click", () => {
+  if (expenses.length === 0) {
+    alert("No hay registros para exportar.");
+    return;
+  }
+
+  const rows = [
+    ["Fecha", "Concepto", "Categoría", "Tipo", "Estado", "Monto", "Moneda", "Cantidad", "Notas"]
+  ];
+
+  const sorted = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  sorted.forEach(e => {
+    rows.push([
+      e.date || "",
+      `"${(e.description || "").replace(/"/g, '""')}"`,
+      getCategoryName(e.category),
+      e.type === "debt" ? "Deuda" : "Gasto",
+      e.paid ? "Pagado" : "Pendiente",
+      e.amount !== null ? e.amount : "",
+      e.currency || "ARS",
+      e.quantity || 1,
+      `"${(e.notes || "").replace(/"/g, '""')}"`
+    ]);
+  });
+
+  const csvContent = "\uFEFF" + rows.map(r => r.join(";")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Gastos-Proximos-${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+
 // ==========================================
 // EXPORTAR REPORTE A PDF
 // ==========================================
-
 $("pdfBtn")?.addEventListener("click", () => {
   if (!window.jspdf) {
     alert("No se pudo cargar la librería para generar el PDF.");
@@ -750,11 +860,10 @@ $("pdfBtn")?.addEventListener("click", () => {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
 
-  const pink = [232, 93, 158];      // #e85d9e
-  const dark = [51, 41, 52];        // #332934
-  const light = [255, 240, 247];    // #fff0f7
+  const pink = [232, 93, 158];
+  const dark = [51, 41, 52];
+  const light = [255, 240, 247];
 
-  // Cabecera rosa principal
   pdf.setFillColor(255, 227, 240);
   pdf.roundedRect(15, 15, 180, 26, 4, 4, "F");
 
@@ -773,7 +882,6 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.setFont("helvetica", "normal");
   pdf.text(`Reporte emitido el ${todayStr}`, 21, 33);
 
-  // Cálculos de resumen
   const pendingItems = expenses.filter(e => !e.paid);
 
   let totalPendingARS = 0;
@@ -816,7 +924,6 @@ $("pdfBtn")?.addEventListener("click", () => {
     pdf.text(card[1], x + 4, 62);
   });
 
-  // Encabezados de tabla
   let y = 76;
   pdf.setFillColor(...pink);
   pdf.rect(15, y, 180, 7, "F");
@@ -833,7 +940,6 @@ $("pdfBtn")?.addEventListener("click", () => {
   y += 7;
   pdf.setFont("helvetica", "normal");
 
-  // Ordenar cronológicamente
   const sortedExpenses = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   sortedExpenses.forEach(expense => {
@@ -859,7 +965,6 @@ $("pdfBtn")?.addEventListener("click", () => {
     y += 9;
   });
 
-  // Subtotal al final
   if (y > 265) {
     pdf.addPage();
     y = 20;
@@ -873,7 +978,6 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.text("TOTAL PENDIENTE DE PAGO", 18, y + 6);
   pdf.text(strPending, 150, y + 6);
 
-  // Pie de página
   pdf.setFontSize(7);
   pdf.setTextColor(160, 140, 150);
   pdf.text("Gastos Próximos · Reporte generado automáticamente", 15, 287);
