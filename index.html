@@ -5,6 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gastos Próximos</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff7597">
+  <link rel="apple-touch-icon" href="https://api.iconify.design/twemoji:cherry-blossom.svg">
+
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -57,6 +63,9 @@
         <span class="eyebrow">MI ORGANIZACIÓN 💗</span>
         <h1>Gastos Próximos</h1>
         <p>Todo lo que tengo que pagar, recordar o debo.</p>
+        <div id="dolarBadge" class="dolar-badge" style="display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.8rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(232, 93, 158, 0.12); color: #c43878;">
+          💵 Dólar Blue: cargando...
+        </div>
       </div>
 
       <div class="header-actions">
@@ -71,6 +80,7 @@
 
         <button class="secondary-button" id="toggleThemeBtn" type="button">🌙 Modo oscuro</button>
         <button class="secondary-button" id="toggleAmountsBtn" type="button">👁️ Ocultar montos</button>
+        <button class="secondary-button" id="csvBtn" type="button">📊 CSV</button>
         <button class="secondary-button" id="pdfBtn" type="button">📄 PDF</button>
         <button class="primary-button" id="openModalBtn">＋ Agregar</button>
         <button class="secondary-button" id="logoutBtn" type="button">Cerrar sesión</button>
@@ -108,18 +118,27 @@
     </section>
 
 
-    <!-- FILTROS -->
+    <!-- FILTROS Y BÚSQUEDA -->
     <section class="toolbar">
       <div class="section-title">
         <h2>Mis pendientes</h2>
         <span id="itemsCount">0 registros</span>
       </div>
 
-      <div class="filters">
-        <button class="filter active" data-filter="all">Todos</button>
-        <button class="filter" data-filter="pending">Pendientes</button>
-        <button class="filter" data-filter="debt">Deudas</button>
-        <button class="filter" data-filter="paid">Pagados</button>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input 
+          type="search" 
+          id="searchInput" 
+          placeholder="🔍 Buscar registro..." 
+          style="padding: 7px 14px; border-radius: 999px; border: 1px solid #f2cfdf; outline: none; font-size: 0.85rem; min-width: 170px;"
+        >
+
+        <div class="filters">
+          <button class="filter active" data-filter="all">Todos</button>
+          <button class="filter" data-filter="pending">Pendientes</button>
+          <button class="filter" data-filter="debt">Deudas</button>
+          <button class="filter" data-filter="paid">Pagados</button>
+        </div>
       </div>
     </section>
 
@@ -206,7 +225,6 @@
             <option value="Otros">📦 Otros</option>
             <option value="Gimnasio">💪 Gimnasio</option> 
             <option value="Agua">💧 Agua</option>
-            
           </select>
         </div>
 
@@ -255,5 +273,4 @@
   <script type="module" src="app.js"></script>
 
 </body>
-
 </html>
