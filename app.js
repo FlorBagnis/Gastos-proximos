@@ -395,6 +395,8 @@ function getCategoryIcon(category) {
     salud: "💊",
     transporte: "🚗",
     otros: "📦"
+    Gimnasio: "💪"
+    agua: "💧"
   };
   return icons[category] || "📦";
 }
@@ -409,6 +411,8 @@ function getCategoryName(category) {
     salud: "Salud",
     transporte: "Transporte",
     otros: "Otros"
+    gimnasio: "Gimnasio"
+    agua: "Agua"
   };
   return names[category] || "Otros";
 }
@@ -421,8 +425,10 @@ function mapCategoryToMensuales(category) {
     servicios: "Servicios",
     salud: "Salud",
     mascotas: "Mascotas",
-    deudas: "Otros",
+    deudas: "Deudas",
     otros: "Otros"
+    gimnasio: "Gimnasio"
+    agua: "Agua"
   };
   return map[category] || "Otros";
 }
