@@ -432,9 +432,9 @@ function mapCategoryToMensuales(category) {
     mascotas: "Mascotas",
     deudas: "Otros",
     otros: "Otros",
-    gimnasio: "Personal",
-    gym: "Personal",
-    agua: "Hogar"
+    gimnasio: "Gimnasio",
+    gym: "Gimnasio",
+    agua: "Agua"
   };
   return map[key] || "Otros";
 }
