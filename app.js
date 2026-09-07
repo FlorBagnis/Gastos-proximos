@@ -425,7 +425,7 @@ function mapCategoryToMensuales(category) {
     servicios: "Servicios",
     salud: "Salud",
     mascotas: "Mascotas",
-    deudas: "Otros",
+    deudas: "Deudas",
     otros: "Otros",
     gimnasio: "Personal",
     agua: "Hogar"
