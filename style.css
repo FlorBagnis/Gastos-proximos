@@ -1064,3 +1064,32 @@ body.dark-mode.amounts-hidden #amount::after {
   color: #ff9db4 !important;
   background-color: transparent;
 }
+
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrap input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.toggle-password:hover {
+  transform: scale(1.1);
+}
