@@ -984,3 +984,18 @@ $("pdfBtn")?.addEventListener("click", () => {
 
   pdf.save(`Gastos-Proximos-${new Date().toISOString().slice(0, 10)}.pdf`);
 });
+
+
+// Mostrar / Ocultar contraseña con estilo florcita y candado
+const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+const authPasswordInput = document.getElementById('authPassword');
+
+if (togglePasswordBtn && authPasswordInput) {
+  togglePasswordBtn.addEventListener('click', () => {
+    const isPassword = authPasswordInput.type === 'password';
+    authPasswordInput.type = isPassword ? 'text' : 'password';
+    
+    // Cambia entre la florcita 🌸 (texto visible) y el candado 🔒 (oculto)
+    togglePasswordBtn.textContent = isPassword ? '🌸' : '🔒';
+  });
+}
