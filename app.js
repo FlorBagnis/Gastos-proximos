@@ -849,7 +849,7 @@ $("csvBtn")?.addEventListener("click", () => {
 
 
 // ==========================================
-// EXPORTAR REPORTE A PDF
+// EXPORTAR REPORTE A PDF (ADAPTADO A MODO OSCURO)
 // ==========================================
 $("pdfBtn")?.addEventListener("click", () => {
   if (!window.jspdf) {
@@ -860,11 +860,22 @@ $("pdfBtn")?.addEventListener("click", () => {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
 
-  const pink = [232, 93, 158];
-  const dark = [51, 41, 52];
-  const light = [255, 240, 247];
+  // --- DETECCIÓN DE MODO OSCURO PARA PDF ---
+  const isDarkMode = document.body.classList.contains("dark-mode");
+  const pink = isDarkMode ? [255, 120, 160] : [232, 93, 158];
+  const dark = isDarkMode ? [240, 240, 240] : [51, 41, 52];
+  const light = isDarkMode ? [45, 35, 40]   : [255, 240, 247];
+  const headerBg = isDarkMode ? [55, 30, 45] : [255, 227, 240];
+  const cardBorder = isDarkMode ? [80, 45, 60] : [240, 223, 232];
+  const lineDivider = isDarkMode ? [50, 35, 42] : [245, 230, 238];
 
-  pdf.setFillColor(255, 227, 240);
+  if (isDarkMode) {
+    pdf.setFillColor(25, 20, 25);
+    pdf.rect(0, 0, 210, 297, "F");
+  }
+  // ----------------------------------------
+
+  pdf.setFillColor(...headerBg);
   pdf.roundedRect(15, 15, 180, 26, 4, 4, "F");
 
   pdf.setTextColor(...dark);
@@ -911,7 +922,7 @@ $("pdfBtn")?.addEventListener("click", () => {
 
   cards.forEach((card, index) => {
     const x = 15 + index * 60;
-    pdf.setDrawColor(240, 223, 232);
+    pdf.setDrawColor(...cardBorder);
     pdf.roundedRect(x, 46, 56, 22, 3, 3, "S");
 
     pdf.setTextColor(...pink);
@@ -945,6 +956,10 @@ $("pdfBtn")?.addEventListener("click", () => {
   sortedExpenses.forEach(expense => {
     if (y > 275) {
       pdf.addPage();
+      if (isDarkMode) {
+        pdf.setFillColor(25, 20, 25);
+        pdf.rect(0, 0, 210, 297, "F");
+      }
       y = 20;
     }
 
@@ -960,13 +975,17 @@ $("pdfBtn")?.addEventListener("click", () => {
     pdf.text(state, 145, y + 5);
     pdf.text(amountStr, 170, y + 5);
 
-    pdf.setDrawColor(245, 230, 238);
+    pdf.setDrawColor(...lineDivider);
     pdf.line(15, y + 8, 195, y + 8);
     y += 9;
   });
 
   if (y > 265) {
     pdf.addPage();
+    if (isDarkMode) {
+      pdf.setFillColor(25, 20, 25);
+      pdf.rect(0, 0, 210, 297, "F");
+    }
     y = 20;
   }
 
@@ -979,7 +998,8 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.text(strPending, 150, y + 6);
 
   pdf.setFontSize(7);
-  pdf.setTextColor(160, 140, 150);
+  const footerColorGP = isDarkMode ? [200, 150, 170] : [160, 140, 150];
+  pdf.setTextColor(...footerColorGP);
   pdf.text("Gastos Próximos · Creado por Flor Bagnis", 15, 287);
 
   pdf.save(`Gastos-Proximos-${new Date().toISOString().slice(0, 10)}.pdf`);
