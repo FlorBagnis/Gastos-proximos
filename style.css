@@ -1093,3 +1093,67 @@ body.dark-mode.amounts-hidden #amount::after {
 .toggle-password:hover {
   transform: scale(1.1);
 }
+
+/* =========================================================
+   MODO AZUL OSCURO TOTAL E INQUEBRANTABLE
+========================================================= */
+body.dark-blue-mode,
+body.dark-blue-mode main.app,
+body.dark-blue-mode dialog {
+  background-color: #070d1e !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode header.header,
+body.dark-blue-mode .summary-card,
+body.dark-blue-mode .panel,
+body.dark-blue-mode .toolbar,
+body.dark-blue-mode .expense,
+body.dark-blue-mode .auth-card,
+body.dark-blue-mode dialog {
+  background-color: #0f1c3f !important;
+  border-color: #14244b !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode header.header .eyebrow,
+body.dark-blue-mode header.header h1,
+body.dark-blue-mode header.header p {
+  color: #f1f5f9 !important;
+}
+
+/* Botones e Inputs en Modo Azul */
+body.dark-blue-mode .secondary-button,
+body.dark-blue-mode .primary-button,
+body.dark-blue-mode button:not(.action-button),
+body.dark-blue-mode select,
+body.dark-blue-mode input[type="search"],
+body.dark-blue-mode input[type="date"],
+body.dark-blue-mode input[type="number"],
+body.dark-blue-mode input[type="text"],
+body.dark-blue-mode input[type="email"],
+body.dark-blue-mode input[type="password"],
+body.dark-blue-mode textarea {
+  background-color: #14244b !important;
+  color: #38bdf8 !important;
+  border: 1px solid #1e3a8a !important;
+}
+
+body.dark-blue-mode .secondary-button:hover,
+body.dark-blue-mode .primary-button:hover {
+  background-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+
+body.dark-blue-mode input::placeholder,
+body.dark-blue-mode textarea::placeholder {
+  color: #8fa5ca !important;
+}
+
+/* Categorías y badges en Modo Azul */
+body.dark-blue-mode .badge {
+  background-color: #14244b !important;
+  color: #38bdf8 !important;
+  border-color: #1e3a8a !important;
+}
+
