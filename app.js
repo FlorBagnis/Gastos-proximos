@@ -20,6 +20,7 @@ import {
   deleteDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.es.min.js";
 
 // Credenciales del proyecto unificado
 const firebaseConfig = {
@@ -884,12 +885,6 @@ $("pdfBtn")?.addEventListener("click", () => {
     return;
   }
 
-  if (!window.jspdf) {
-    alert("No se pudo cargar la librería para generar el PDF.");
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
 
   const isDarkMode = document.body.classList.contains("dark-mode");
