@@ -9,12 +9,12 @@
   <meta name="format-detection" content="telephone=no">
   <link rel="stylesheet" href="style.css">
 
-<!-- Librería jsPDF para exportar archivos PDF sin errores -->
+  <!-- Librería jsPDF para exportar archivos PDF sin errores -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
+  <style>
     /* =========================================================
-       MODO AZUL DEFINITIVO: TARJETAS UNIFORMES Y ARMONIOSAS
+       MODO AZUL Y CORRECCIÓN MÓVIL ABSOLUTA
     ========================================================= */
     body.dark-blue-mode,
     body.dark-blue-mode main.app,
@@ -104,16 +104,15 @@
       color: #38bdf8 !important;
     }
 
-    /* =========================================================
-       CORRECCIÓN RESPONSIVE DEFINITIVA PARA MÓVILES
-    ========================================================= */
+    /* FORZAR CONTENEDORES Y BOTONERA EN CELULARES */
     @media (max-width: 768px) {
-      body {
-        margin: 0 !important;
-        padding: 8px !important;
+      html, body {
         width: 100% !important;
-        box-sizing: border-box !important;
+        max-width: 100% !important;
         overflow-x: hidden !important;
+        margin: 0 !important;
+        padding: 4px !important;
+        box-sizing: border-box !important;
       }
 
       .app {
@@ -125,12 +124,10 @@
       }
 
       header.header {
-        display: flex !important;
-        flex-direction: column !important;
-        padding: 16px !important;
-        border-radius: 16px !important;
+        display: block !important;
         width: 100% !important;
         box-sizing: border-box !important;
+        padding: 14px !important;
       }
 
       .header-actions {
@@ -139,24 +136,24 @@
         width: 100% !important;
         gap: 8px !important;
         margin-top: 15px !important;
+        box-sizing: border-box !important;
       }
 
-      .header-actions button,
-      .header-actions a,
-      .user-email {
+      .header-actions > * {
+        display: block !important;
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
         text-align: center !important;
-        justify-content: center !important;
         margin: 0 !important;
       }
 
       .summary-grid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
         width: 100% !important;
+        box-sizing: border-box !important;
       }
 
       .summary-card {
@@ -165,36 +162,29 @@
       }
 
       .toolbar {
-        display: flex !important;
-        flex-direction: column !important;
+        display: block !important;
         width: 100% !important;
-        padding: 16px !important;
-        border-radius: 16px !important;
         box-sizing: border-box !important;
-        gap: 12px !important;
-      }
-
-      .toolbar > div {
-        width: 100% !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
+        padding: 14px !important;
       }
 
       .toolbar input[type="search"] {
         width: 100% !important;
-        min-width: 100% !important;
         box-sizing: border-box !important;
+        margin-bottom: 10px !important;
       }
 
       .filters {
         display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 6px !important;
         width: 100% !important;
+        box-sizing: border-box !important;
       }
 
       .filters button {
         width: 100% !important;
+        box-sizing: border-box !important;
       }
 
       .expense {
@@ -203,24 +193,17 @@
       }
 
       .modal {
-        width: 92% !important;
+        width: 95% !important;
         max-height: 85vh !important;
-        padding: 16px !important;
-        border-radius: 16px !important;
         box-sizing: border-box !important;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr !important;
       }
     }
   </style>
-
-  
+</head>
 <body>
 
   <!-- ==============================
-        AUTENTICACIÓN (LOGIN / REGISTRO)
+       AUTENTICACIÓN (LOGIN / REGISTRO)
   =============================== -->
   <section id="authSection" class="auth-section hidden">
     <div class="auth-card">
@@ -236,12 +219,12 @@
         </label>
 
        <label>
-  Contraseña
-  <div class="password-wrap">
-    <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" minlength="6" required>
-    <button type="button" id="togglePasswordBtn" class="toggle-password" title="Mostrar/Ocultar contraseña">🔒</button>
-  </div>
-</label>
+          Contraseña
+          <div class="password-wrap">
+            <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" minlength="6" required>
+            <button type="button" id="togglePasswordBtn" class="toggle-password" title="Mostrar/Ocultar contraseña">🔒</button>
+          </div>
+        </label>
 
         <button id="authSubmitBtn" type="submit" class="primary-button auth-submit">
           Iniciar sesión
@@ -258,7 +241,7 @@
 
 
   <!-- ==============================
-        APLICACIÓN PRINCIPAL
+       APLICACIÓN PRINCIPAL
   =============================== -->
   <div class="app hidden" id="appContent">
 
@@ -272,26 +255,25 @@
           💵 Dólar Blue: cargando...
         </div>
       </div>
-<div class="header-actions">
-  <span id="userEmail" class="user-email"></span>
+      <div class="header-actions">
+        <span id="userEmail" class="user-email"></span>
 
-  <a 
-    href="https://gastosmensuales-two.vercel.app/" 
-    class="secondary-button"
-    style="padding: 11px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;"
-  >
-    💗 Mensuales
-  </a>
+        <a 
+          href="https://gastosmensuales-two.vercel.app/" 
+          class="secondary-button"
+          style="padding: 11px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;"
+        >
+          💗 Mensuales
+        </a>
 
-  <button class="secondary-button" id="toggleThemeBtn" type="button">🌙 Modo oscuro</button>
-  <button class="secondary-button" id="toggleBlueThemeBtn" type="button">💙 Modo Azul</button>
-  <button class="secondary-button" id="toggleAmountsBtn" type="button">👁️ Ocultar montos</button>
-  <button class="secondary-button" id="csvBtn" type="button">📊 CSV</button>
-  <button class="secondary-button" id="pdfBtn" type="button">📄 PDF</button>
-  <button class="primary-button" id="openModalBtn">＋ Agregar</button>
-  <button class="secondary-button" id="logoutBtn" type="button">Cerrar sesión</button>
-</div>
-      
+        <button class="secondary-button" id="toggleThemeBtn" type="button">🌙 Modo oscuro</button>
+        <button class="secondary-button" id="toggleBlueThemeBtn" type="button">💙 Modo Azul</button>
+        <button class="secondary-button" id="toggleAmountsBtn" type="button">👁️ Ocultar montos</button>
+        <button class="secondary-button" id="csvBtn" type="button">📊 CSV</button>
+        <button class="secondary-button" id="pdfBtn" type="button">📄 PDF</button>
+        <button class="primary-button" id="openModalBtn">＋ Agregar</button>
+        <button class="secondary-button" id="logoutBtn" type="button">Cerrar sesión</button>
+      </div>
     </header>
 
 
@@ -410,6 +392,12 @@
               </span>
             </label>
           </div>
+        </div>
+
+        <!-- FECHA DE INICIO DE DEUDA (DINÁMICO) -->
+        <div class="form-group" id="debtStartDateGroup" style="display: none;">
+          <label for="startDate">¿Cuándo se originó esta deuda?</label>
+          <input type="date" id="startDate">
         </div>
 
         <!-- DESCRIPCIÓN -->
