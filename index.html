@@ -1,6 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<style>
+    /* =========================================================
+       FORZAR MODO AZUL ABSOLUTO Y TOTAL (INCRUSTADO)
+    ========================================================= */
+    body.dark-blue-mode,
+    body.dark-blue-mode main.app,
+    body.dark-blue-mode dialog {
+      background-color: #070d1e !important;
+      color: #f1f5f9 !important;
+    }
+
+    body.dark-blue-mode header.header,
+    body.dark-blue-mode .summary-card,
+    body.dark-blue-mode .summary-card.main-card,
+    body.dark-blue-mode .panel,
+    body.dark-blue-mode .toolbar,
+    body.dark-blue-mode .expense,
+    body.dark-blue-mode .auth-card,
+    body.dark-blue-mode dialog {
+      background: #0f1c3f !important;
+      background-color: #0f1c3f !important;
+      border-color: #14244b !important;
+      color: #f1f5f9 !important;
+    }
+
+    body.dark-blue-mode header.header .eyebrow,
+    body.dark-blue-mode header.header h1,
+    body.dark-blue-mode header.header p,
+    body.dark-blue-mode .summary-card.main-card strong,
+    body.dark-blue-mode .modal-header h2,
+    body.dark-blue-mode .modal-header p,
+    body.dark-blue-mode .form-group label {
+      color: #38bdf8 !important;
+    }
+
+    /* Forzar Modal completo sin nada blanco */
+    body.dark-blue-mode .modal-overlay {
+      background: rgba(2, 6, 15, 0.85) !important;
+    }
+
+    body.dark-blue-mode .modal,
+    body.dark-blue-mode .modal * {
+      background-color: #0f1c3f !important;
+      color: #f1f5f9 !important;
+      border-color: #14244b !important;
+    }
+
+    body.dark-blue-mode .modal input,
+    body.dark-blue-mode .modal select,
+    body.dark-blue-mode .modal textarea,
+    body.dark-blue-mode .modal .money-input {
+      background-color: #070d1e !important;
+      color: #38bdf8 !important;
+      border: 1px solid #14244b !important;
+    }
+
+    body.dark-blue-mode .modal .type-option span {
+      background-color: #070d1e !important;
+      border: 1px solid #14244b !important;
+    }
+
+    body.dark-blue-mode .modal .type-option input:checked + span {
+      background-color: #10214a !important;
+      border-color: #38bdf8 !important;
+    }
+
+    body.dark-blue-mode .modal .close-modal {
+      background-color: #14244b !important;
+      color: #38bdf8 !important;
+    }
+  </style>
+</head>
+
+
+  
 <head>
   <meta name="format-detection" content="telephone=no">
   <link rel="icon" type="image/png" href="./icono.png">
