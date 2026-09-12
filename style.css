@@ -1244,3 +1244,41 @@ body.dark-blue-mode .helper {
 }
 
 
+/* =========================================================
+   FORZAR MODO AZUL ABSOLUTO EN EL MODAL Y SUS ELEMENTOS
+========================================================= */
+body.dark-blue-mode .modal-overlay {
+  background: rgba(2, 6, 15, 0.85) !important;
+}
+
+body.dark-blue-mode .modal,
+body.dark-blue-mode .modal * {
+  background-color: #0f1c3f !important;
+  color: #f1f5f9 !important;
+  border-color: #14244b !important;
+}
+
+body.dark-blue-mode .modal input,
+body.dark-blue-mode .modal select,
+body.dark-blue-mode .modal textarea,
+body.dark-blue-mode .modal .money-input {
+  background-color: #070d1e !important;
+  color: #38bdf8 !important;
+  border: 1px solid #14244b !important;
+}
+
+body.dark-blue-mode .modal .type-option span {
+  background-color: #070d1e !important;
+  border: 1px solid #14244b !important;
+}
+
+body.dark-blue-mode .modal .type-option input:checked + span {
+  background-color: #10214a !important;
+  border-color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .modal .close-modal {
+  background-color: #14244b !important;
+  color: #38bdf8 !important;
+}
+
