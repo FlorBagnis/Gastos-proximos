@@ -14,7 +14,7 @@
 
     <style>
     /* =========================================================
-       MODO AZUL IDÉNTICO Y LIMPIO (ESTRUCTURA MODO OSCURO)
+       MODO AZUL FORZADO: HEADER Y TOOLBAR CON ESTILO DE TARJETA
     ========================================================= */
     body.dark-blue-mode,
     body.dark-blue-mode main.app,
@@ -23,7 +23,16 @@
       color: #f1f5f9 !important;
     }
 
-    body.dark-blue-mode header.header,
+    body.dark-blue-mode header.header {
+      background: #0f1c3f !important;
+      background-color: #0f1c3f !important;
+      border: 1px solid #14244b !important;
+      border-radius: 20px !important;
+      padding: 24px !important;
+      margin-bottom: 24px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+
     body.dark-blue-mode .summary-card,
     body.dark-blue-mode .summary-card.main-card,
     body.dark-blue-mode .toolbar,
@@ -35,6 +44,15 @@
       background-color: #0f1c3f !important;
       border-color: #14244b !important;
       color: #f1f5f9 !important;
+    }
+
+    body.dark-blue-mode .toolbar {
+      border-radius: 20px !important;
+      padding: 24px !important;
+      margin-top: 24px !important;
+      margin-bottom: 24px !important;
+      border: 1px solid #14244b !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
     }
 
     body.dark-blue-mode header.header .eyebrow,
@@ -57,7 +75,6 @@
       background: rgba(2, 6, 15, 0.85) !important;
     }
 
-    /* Inputs, selects y textareas limpios */
     body.dark-blue-mode input:not([type="radio"]),
     body.dark-blue-mode select,
     body.dark-blue-mode textarea,
@@ -67,7 +84,6 @@
       border: 1px solid #14244b !important;
     }
 
-    /* Opciones del modal exactamente como el modo oscuro */
     body.dark-blue-mode .type-option span {
       background-color: #070d1e !important;
       border: 1px solid #14244b !important;
