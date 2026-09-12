@@ -874,8 +874,9 @@ $("csvBtn")?.addEventListener("click", () => {
   document.body.removeChild(link);
 });
 
+
 // ==========================================
-// EXPORTAR REPORTE A PDF (ADAPTADO A TRES TEMAS)
+// EXPORTAR REPORTE A PDF (USA CDN GLOBAL)
 // ==========================================
 $("pdfBtn")?.addEventListener("click", () => {
   if (expenses.length === 0) {
