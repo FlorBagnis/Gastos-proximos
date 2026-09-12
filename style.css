@@ -1438,3 +1438,24 @@ body.dark-blue-mode .toolbar {
   padding: 20px !important;
 }
 
+
+/* =========================================================
+   MODO AZUL LIMPIO Y ARMONIOSO (SIN BORDES FORZADOS)
+========================================================= */
+body.dark-blue-mode header.header {
+  background: #0f1c3f !important;
+  background-color: #0f1c3f !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body.dark-blue-mode .toolbar {
+  background: #0f1c3f !important;
+  background-color: #0f1c3f !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+
