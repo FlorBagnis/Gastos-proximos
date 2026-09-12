@@ -12,9 +12,9 @@
 <!-- Librería jsPDF para exportar archivos PDF sin errores -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <style>
+    <style>
     /* =========================================================
-       MODO AZUL DEFINITIVO Y UNIFORME
+       MODO AZUL IDÉNTICO Y LIMPIO (ESTRUCTURA MODO OSCURO)
     ========================================================= */
     body.dark-blue-mode,
     body.dark-blue-mode main.app,
@@ -57,7 +57,7 @@
       background: rgba(2, 6, 15, 0.85) !important;
     }
 
-    /* Inputs, selects y textareas uniformes y limpios */
+    /* Inputs, selects y textareas limpios */
     body.dark-blue-mode input:not([type="radio"]),
     body.dark-blue-mode select,
     body.dark-blue-mode textarea,
@@ -67,41 +67,16 @@
       border: 1px solid #14244b !important;
     }
 
-    /* Corrección total para las opciones de tipo de gasto (elimina las franjas azules internas) */
-    body.dark-blue-mode .type-option,
-    body.dark-blue-mode .type-option span,
-    body.dark-blue-mode .type-option span strong,
-    body.dark-blue-mode .type-option span small {
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-
+    /* Opciones del modal exactamente como el modo oscuro */
     body.dark-blue-mode .type-option span {
       background-color: #070d1e !important;
       border: 1px solid #14244b !important;
-      border-radius: 12px !important;
-      display: flex !important;
-      flex-direction: column !important;
-      width: 100% !important;
-    }
-
-    body.dark-blue-mode .type-option span strong {
       color: #f1f5f9 !important;
-    }
-
-    body.dark-blue-mode .type-option span small {
-      color: #94a3b8 !important;
     }
 
     body.dark-blue-mode .type-option input:checked + span {
       background-color: #10214a !important;
       border-color: #38bdf8 !important;
-    }
-
-    body.dark-blue-mode .type-option input:checked + span strong {
-      color: #38bdf8 !important;
     }
 
     body.dark-blue-mode .close-modal {
@@ -117,7 +92,6 @@
       color: #38bdf8 !important;
     }
   </style>
-
 <body>
 
   <!-- ==============================
