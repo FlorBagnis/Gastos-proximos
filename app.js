@@ -3,6 +3,14 @@
    INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + TRES TEMAS + ALERTAS + CSV + BUSCADOR
 ========================================== */
 
+/*
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(err => console.log("SW error:", err));
+  });
+}
+*/
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
   getAuth,
