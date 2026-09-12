@@ -1462,3 +1462,90 @@ body.dark-blue-mode .toolbar {
   margin-bottom: 24px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
+
+
+
+<style>
+    /* =========================================================
+       CORRECCIÓN RESPONSIVE PARA MÓVILES
+    ========================================================= */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px !important;
+        overflow-x: hidden !important;
+      }
+
+      .app {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      header.header {
+        padding: 16px !important;
+        border-radius: 16px !important;
+      }
+
+      .header-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 8px !important;
+        margin-top: 15px !important;
+      }
+
+      .header-actions button,
+      .header-actions a {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      .toolbar {
+        padding: 16px !important;
+        border-radius: 16px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+
+      .toolbar > div {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+
+      .toolbar input[type="search"] {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+
+      .filters {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+      }
+
+      .filters button {
+        width: 100% !important;
+        text-align: center !important;
+      }
+
+      .modal {
+        width: 92% !important;
+        max-height: 85vh !important;
+        padding: 16px !important;
+        border-radius: 16px !important;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+
