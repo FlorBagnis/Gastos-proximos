@@ -1177,3 +1177,70 @@ body.dark-blue-mode .expense-icon {
   background-color: #14244b !important;
   color: #38bdf8 !important;
 }
+
+
+/* =========================================================
+   FORZAR MODO AZUL TOTAL E INQUEBRANTABLE (TARJETA Y MODAL)
+========================================================= */
+
+/* 1. Tarjeta principal de la izquierda (Total pendiente) */
+body.dark-blue-mode .summary-card.main-card {
+  background: #0f1c3f !important;
+  background-color: #0f1c3f !important;
+  border-color: #14244b !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .summary-card.main-card strong {
+  color: #38bdf8 !important;
+}
+
+/* 2. Fondo general del Modal y su contenedor */
+body.dark-blue-mode .modal-overlay {
+  background: rgba(4, 8, 20, 0.75) !important;
+}
+
+body.dark-blue-mode .modal {
+  background-color: #0f1c3f !important;
+  border: 1px solid #14244b !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .modal-header h2,
+body.dark-blue-mode .modal-header p,
+body.dark-blue-mode .form-group label {
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .close-modal {
+  background: #14244b !important;
+  color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .modal-icon {
+  background-color: #14244b !important;
+  color: #38bdf8 !important;
+}
+
+/* 3. Opciones de selección de tipo (Gasto próximo / Deuda) dentro del modal */
+body.dark-blue-mode .type-option span {
+  background-color: #070d1e !important;
+  border-color: #14244b !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .type-option input:checked + span {
+  background-color: #10214a !important;
+  border-color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .type-option strong {
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .type-option small,
+body.dark-blue-mode .helper {
+  color: #8fa5ca !important;
+}
+
+
