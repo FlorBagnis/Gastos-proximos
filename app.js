@@ -3,14 +3,6 @@
    INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + TRES TEMAS + ALERTAS + CSV + BUSCADOR
 ========================================== */
 
-/*
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(err => console.log("SW error:", err));
-  });
-}
-*/
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
   getAuth,
@@ -28,6 +20,7 @@ import {
   deleteDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.es.min.js";
 
 // Credenciales del proyecto unificado
 const firebaseConfig = {
@@ -234,7 +227,6 @@ $("logoutBtn").addEventListener("click", async () => {
 onAuthStateChanged(auth, user => {
   currentUser = user;
 
-  // Restaurar tema guardado al cambiar de estado de sesión
   const savedTheme = localStorage.getItem("mensual_theme_mode") || "light";
   document.body.classList.remove("dark-mode", "dark-blue-mode");
   if (savedTheme === "dark") {
@@ -888,15 +880,13 @@ $("csvBtn")?.addEventListener("click", () => {
 // EXPORTAR REPORTE A PDF (ADAPTADO A TRES TEMAS)
 // ==========================================
 $("pdfBtn")?.addEventListener("click", () => {
-  if (!window.jspdf) {
-    alert("No se pudo cargar la librería para generar el PDF.");
+  if (expenses.length === 0) {
+    alert("No hay registros para exportar.");
     return;
   }
 
-  const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
 
-  // --- DETECCIÓN DE TEMA PARA PDF ---
   const isDarkMode = document.body.classList.contains("dark-mode");
   const isBlueMode = document.body.classList.contains("dark-blue-mode");
 
@@ -935,7 +925,6 @@ $("pdfBtn")?.addEventListener("click", () => {
     pdf.setFillColor(...pageBgColor);
     pdf.rect(0, 0, 210, 297, "F");
   }
-  // ----------------------------------------
 
   pdf.setFillColor(...headerBg);
   pdf.roundedRect(15, 15, 180, 26, 4, 4, "F");
@@ -1067,7 +1056,7 @@ $("pdfBtn")?.addEventListener("click", () => {
 });
 
 
-// Mostrar / Ocultar contraseña con estilo florcita y candado
+// Mostrar / Ocultar contraseña
 const togglePasswordBtn = document.getElementById('togglePasswordBtn');
 const authPasswordInput = document.getElementById('authPassword');
 
