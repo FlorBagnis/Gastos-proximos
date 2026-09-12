@@ -1400,3 +1400,24 @@ body.dark-blue-mode .modal .type-option input:checked + span strong {
 body.dark-blue-mode .modal .type-option span small {
   color: #8fa5ca !important;
 }
+
+/* =========================================================
+   SOLUCIÓN DEFINITIVA FRANJAS OPCIONES MODAL MODO AZUL
+========================================================= */
+body.dark-blue-mode .modal .type-option span,
+body.dark-blue-mode .modal .type-option span strong,
+body.dark-blue-mode .modal .type-option span small {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body.dark-blue-mode .modal .type-option input:checked + span {
+  background-color: #10214a !important;
+  border-color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .modal .type-option input:checked + span strong {
+  color: #38bdf8 !important;
+}
+
