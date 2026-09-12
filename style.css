@@ -1421,3 +1421,20 @@ body.dark-blue-mode .modal .type-option input:checked + span strong {
   color: #38bdf8 !important;
 }
 
+/* =========================================================
+   CORRECCIÓN FINAL DISEÑO HEADER Y TOOLBAR (MODO AZUL)
+========================================================= */
+body.dark-blue-mode header.header {
+  border-radius: 16px !important;
+  margin-bottom: 24px !important;
+  border: 1px solid #14244b !important;
+}
+
+body.dark-blue-mode .toolbar {
+  border-radius: 16px !important;
+  margin-top: 10px !important;
+  margin-bottom: 20px !important;
+  border: 1px solid #14244b !important;
+  padding: 20px !important;
+}
+
