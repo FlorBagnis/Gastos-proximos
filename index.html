@@ -14,7 +14,7 @@
 
     <style>
     /* =========================================================
-       MODO AZUL: HEADER Y TOOLBAR COMO TARJETAS FLOTANTES
+       MODO AZUL DEFINITIVO: TARJETAS UNIFORMES Y ARMONIOSAS
     ========================================================= */
     body.dark-blue-mode,
     body.dark-blue-mode main.app,
@@ -23,36 +23,33 @@
       color: #f1f5f9 !important;
     }
 
-    body.dark-blue-mode header.header {
-      background: #0f1c3f !important;
-      background-color: #0f1c3f !important;
-      border: 1px solid #14244b !important;
-      border-radius: 24px !important;
-      padding: 30px !important;
-      margin-bottom: 24px !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
-    }
-
+    /* Unificar header y toolbar con el estilo de tarjeta de los gastos */
+    body.dark-blue-mode header.header,
+    body.dark-blue-mode .toolbar,
     body.dark-blue-mode .summary-card,
     body.dark-blue-mode .summary-card.main-card,
-    body.dark-blue-mode .toolbar,
     body.dark-blue-mode .expense,
     body.dark-blue-mode .auth-card,
     body.dark-blue-mode .modal,
     body.dark-blue-mode dialog {
       background: #0f1c3f !important;
       background-color: #0f1c3f !important;
-      border-color: #14244b !important;
+      border: 1px solid #14244b !important;
+      border-radius: 20px !important;
       color: #f1f5f9 !important;
     }
 
+    body.dark-blue-mode header.header {
+      padding: 28px !important;
+      margin-bottom: 24px !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+    }
+
     body.dark-blue-mode .toolbar {
-      border-radius: 24px !important;
-      padding: 24px 30px !important;
+      padding: 24px !important;
       margin-top: 24px !important;
       margin-bottom: 24px !important;
-      border: 1px solid #14244b !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
     }
 
     body.dark-blue-mode header.header .eyebrow,
@@ -75,6 +72,7 @@
       background: rgba(2, 6, 15, 0.85) !important;
     }
 
+    /* Inputs y campos limpios */
     body.dark-blue-mode input:not([type="radio"]),
     body.dark-blue-mode select,
     body.dark-blue-mode textarea,
@@ -84,6 +82,7 @@
       border: 1px solid #14244b !important;
     }
 
+    /* Opciones del modal prolijas */
     body.dark-blue-mode .type-option span {
       background-color: #070d1e !important;
       border: 1px solid #14244b !important;
