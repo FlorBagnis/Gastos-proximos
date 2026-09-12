@@ -1,6 +1,6 @@
 /* ==========================================
    GASTOS PRÓXIMOS
-   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + MODO OSCURO + ALERTAS + CSV + BUSCADOR
+   INTEGRACIÓN BIDIRECCIONAL CON MENSUALES + DÓLARES + TRES TEMAS + ALERTAS + CSV + BUSCADOR
 ========================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -226,6 +226,15 @@ $("logoutBtn").addEventListener("click", async () => {
 onAuthStateChanged(auth, user => {
   currentUser = user;
 
+  // Restaurar tema guardado al cambiar de estado de sesión
+  const savedTheme = localStorage.getItem("mensual_theme_mode") || "light";
+  document.body.classList.remove("dark-mode", "dark-blue-mode");
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-mode");
+  } else if (savedTheme === "blue") {
+    document.body.classList.add("dark-blue-mode");
+  }
+
   if (!user) {
     stopFirestoreSync();
     expenses = [];
@@ -243,28 +252,47 @@ onAuthStateChanged(auth, user => {
 
   setDefaultDate();
   setupAmountsToggle();
-  setupThemeToggle();
+  setupThemeToggles();
   setupCurrencyIndicator();
   fetchDolarRate();
   startFirestoreSync();
 });
 
 
-// MODO OSCURO CON LOCALSTORAGE
-function setupThemeToggle() {
+// GESTIÓN DE TRES TEMAS (CLARO, OSCURO Y AZUL)
+function setupThemeToggles() {
   const toggleThemeBtn = $("toggleThemeBtn");
-  const isDark = localStorage.getItem("gastos_proximos_theme") === "dark";
+  const toggleBlueThemeBtn = $("toggleBlueThemeBtn");
+  const savedTheme = localStorage.getItem("mensual_theme_mode") || "light";
 
-  if (isDark) {
-    document.body.classList.add("dark-mode");
+  if (savedTheme === "dark") {
     if (toggleThemeBtn) toggleThemeBtn.textContent = "☀️ Modo claro";
+    if (toggleBlueThemeBtn) toggleBlueThemeBtn.textContent = "💙 Modo Azul";
+  } else if (savedTheme === "blue") {
+    if (toggleBlueThemeBtn) toggleBlueThemeBtn.textContent = "☀️ Modo claro";
+    if (toggleThemeBtn) toggleThemeBtn.textContent = "🌙 Modo oscuro";
+  } else {
+    if (toggleThemeBtn) toggleThemeBtn.textContent = "🌙 Modo oscuro";
+    if (toggleBlueThemeBtn) toggleBlueThemeBtn.textContent = "💙 Modo Azul";
   }
 
   if (toggleThemeBtn) {
     toggleThemeBtn.onclick = () => {
-      const activeDark = document.body.classList.toggle("dark-mode");
-      localStorage.setItem("gastos_proximos_theme", activeDark ? "dark" : "light");
-      toggleThemeBtn.textContent = activeDark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+      const isDark = document.body.classList.toggle("dark-mode");
+      document.body.classList.remove("dark-blue-mode");
+      localStorage.setItem("mensual_theme_mode", isDark ? "dark" : "light");
+      toggleThemeBtn.textContent = isDark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+      if (toggleBlueThemeBtn) toggleBlueThemeBtn.textContent = "💙 Modo Azul";
+    };
+  }
+
+  if (toggleBlueThemeBtn) {
+    toggleBlueThemeBtn.onclick = () => {
+      const isBlue = document.body.classList.toggle("dark-blue-mode");
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("mensual_theme_mode", isBlue ? "blue" : "light");
+      toggleBlueThemeBtn.textContent = isBlue ? "☀️ Modo claro" : "💙 Modo Azul";
+      if (toggleThemeBtn) toggleThemeBtn.textContent = "🌙 Modo oscuro";
     };
   }
 }
@@ -849,7 +877,7 @@ $("csvBtn")?.addEventListener("click", () => {
 
 
 // ==========================================
-// EXPORTAR REPORTE A PDF (ADAPTADO A MODO OSCURO)
+// EXPORTAR REPORTE A PDF (ADAPTADO A TRES TEMAS)
 // ==========================================
 $("pdfBtn")?.addEventListener("click", () => {
   if (!window.jspdf) {
@@ -860,17 +888,43 @@ $("pdfBtn")?.addEventListener("click", () => {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
 
-  // --- DETECCIÓN DE MODO OSCURO PARA PDF ---
+  // --- DETECCIÓN DE TEMA PARA PDF ---
   const isDarkMode = document.body.classList.contains("dark-mode");
-  const pink = isDarkMode ? [255, 120, 160] : [232, 93, 158];
-  const dark = isDarkMode ? [240, 240, 240] : [51, 41, 52];
-  const light = isDarkMode ? [45, 35, 40]   : [255, 240, 247];
-  const headerBg = isDarkMode ? [55, 30, 45] : [255, 227, 240];
-  const cardBorder = isDarkMode ? [80, 45, 60] : [240, 223, 232];
-  const lineDivider = isDarkMode ? [50, 35, 42] : [245, 230, 238];
+  const isBlueMode = document.body.classList.contains("dark-blue-mode");
 
-  if (isDarkMode) {
-    pdf.setFillColor(25, 20, 25);
+  let pink, dark, light, headerBg, cardBorder, lineDivider, pageBgColor, footerColorGP;
+
+  if (isBlueMode) {
+    pink = [56, 189, 248];
+    dark = [241, 245, 249];
+    light = [15, 28, 63];
+    headerBg = [7, 13, 30];
+    cardBorder = [30, 53, 109];
+    lineDivider = [20, 36, 75];
+    pageBgColor = [7, 13, 30];
+    footerColorGP = [143, 165, 202];
+  } else if (isDarkMode) {
+    pink = [255, 120, 160];
+    dark = [240, 240, 240];
+    light = [45, 35, 40];
+    headerBg = [55, 30, 45];
+    cardBorder = [80, 45, 60];
+    lineDivider = [50, 35, 42];
+    pageBgColor = [25, 20, 25];
+    footerColorGP = [200, 150, 170];
+  } else {
+    pink = [232, 93, 158];
+    dark = [51, 41, 52];
+    light = [255, 240, 247];
+    headerBg = [255, 227, 240];
+    cardBorder = [240, 223, 232];
+    lineDivider = [245, 230, 238];
+    pageBgColor = null;
+    footerColorGP = [160, 140, 150];
+  }
+
+  if (pageBgColor) {
+    pdf.setFillColor(...pageBgColor);
     pdf.rect(0, 0, 210, 297, "F");
   }
   // ----------------------------------------
@@ -881,7 +935,7 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.setTextColor(...dark);
   pdf.setFontSize(16);
   pdf.setFont("helvetica", "bold");
-  pdf.text("AGENDA DE GASTOS PRÓXIMOS", 21, 26);
+  pdf.text("AGENDA DE GASTOS PROXIMOS", 21, 26);
 
   const todayStr = new Date().toLocaleDateString("es-AR", {
     day: "2-digit",
@@ -956,8 +1010,8 @@ $("pdfBtn")?.addEventListener("click", () => {
   sortedExpenses.forEach(expense => {
     if (y > 275) {
       pdf.addPage();
-      if (isDarkMode) {
-        pdf.setFillColor(25, 20, 25);
+      if (pageBgColor) {
+        pdf.setFillColor(...pageBgColor);
         pdf.rect(0, 0, 210, 297, "F");
       }
       y = 20;
@@ -982,8 +1036,8 @@ $("pdfBtn")?.addEventListener("click", () => {
 
   if (y > 265) {
     pdf.addPage();
-    if (isDarkMode) {
-      pdf.setFillColor(25, 20, 25);
+    if (pageBgColor) {
+      pdf.setFillColor(...pageBgColor);
       pdf.rect(0, 0, 210, 297, "F");
     }
     y = 20;
@@ -998,7 +1052,6 @@ $("pdfBtn")?.addEventListener("click", () => {
   pdf.text(strPending, 150, y + 6);
 
   pdf.setFontSize(7);
-  const footerColorGP = isDarkMode ? [200, 150, 170] : [160, 140, 150];
   pdf.setTextColor(...footerColorGP);
   pdf.text("Gastos Próximos · Creado por Flor Bagnis", 15, 287);
 
@@ -1014,8 +1067,6 @@ if (togglePasswordBtn && authPasswordInput) {
   togglePasswordBtn.addEventListener('click', () => {
     const isPassword = authPasswordInput.type === 'password';
     authPasswordInput.type = isPassword ? 'text' : 'password';
-    
-    // Cambia entre la florcita 🌸 (texto visible) y el candado 🔒 (oculto)
     togglePasswordBtn.textContent = isPassword ? '🌸' : '🔒';
   });
 }
