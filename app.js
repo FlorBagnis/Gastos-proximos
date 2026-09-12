@@ -875,7 +875,6 @@ $("csvBtn")?.addEventListener("click", () => {
   document.body.removeChild(link);
 });
 
-
 // ==========================================
 // EXPORTAR REPORTE A PDF (ADAPTADO A TRES TEMAS)
 // ==========================================
