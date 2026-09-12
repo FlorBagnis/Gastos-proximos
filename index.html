@@ -11,10 +11,12 @@
 
 <!-- Librería jsPDF para exportar archivos PDF sin errores -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   
-  <style>
+<style>
+    
     /* =========================================================
-       FORZAR MODO AZUL ABSOLUTO Y TOTAL (INCRUSTADO)
+       MODO AZUL DEFINITIVO Y UNIFORME
     ========================================================= */
     body.dark-blue-mode,
     body.dark-blue-mode main.app,
@@ -26,10 +28,10 @@
     body.dark-blue-mode header.header,
     body.dark-blue-mode .summary-card,
     body.dark-blue-mode .summary-card.main-card,
-    body.dark-blue-mode .panel,
     body.dark-blue-mode .toolbar,
     body.dark-blue-mode .expense,
     body.dark-blue-mode .auth-card,
+    body.dark-blue-mode .modal,
     body.dark-blue-mode dialog {
       background: #0f1c3f !important;
       background-color: #0f1c3f !important;
@@ -43,7 +45,12 @@
     body.dark-blue-mode .summary-card.main-card strong,
     body.dark-blue-mode .modal-header h2,
     body.dark-blue-mode .modal-header p,
-    body.dark-blue-mode .form-group label {
+    body.dark-blue-mode .form-group label,
+    body.dark-blue-mode .section-title h2 {
+      color: #f1f5f9 !important;
+    }
+
+    body.dark-blue-mode .summary-card.main-card strong {
       color: #38bdf8 !important;
     }
 
@@ -51,38 +58,51 @@
       background: rgba(2, 6, 15, 0.85) !important;
     }
 
-    body.dark-blue-mode .modal,
-    body.dark-blue-mode .modal * {
-      background-color: #0f1c3f !important;
-      color: #f1f5f9 !important;
-      border-color: #14244b !important;
-    }
-
-    body.dark-blue-mode .modal input,
-    body.dark-blue-mode .modal select,
-    body.dark-blue-mode .modal textarea,
-    body.dark-blue-mode .modal .money-input {
+    /* Inputs, selects y textareas uniformes y limpios */
+    body.dark-blue-mode input:not([type="radio"]),
+    body.dark-blue-mode select,
+    body.dark-blue-mode textarea,
+    body.dark-blue-mode .money-input {
       background-color: #070d1e !important;
       color: #38bdf8 !important;
       border: 1px solid #14244b !important;
     }
 
-    body.dark-blue-mode .modal .type-option span {
+    /* Eliminar franjas en las opciones de tipo de gasto del modal */
+    body.dark-blue-mode .type-option span {
       background-color: #070d1e !important;
       border: 1px solid #14244b !important;
+      color: #f1f5f9 !important;
     }
 
-    body.dark-blue-mode .modal .type-option input:checked + span {
+    body.dark-blue-mode .type-option span strong,
+    body.dark-blue-mode .type-option span small {
+      background: transparent !important;
+      color: #f1f5f9 !important;
+    }
+
+    body.dark-blue-mode .type-option input:checked + span {
       background-color: #10214a !important;
       border-color: #38bdf8 !important;
     }
 
-    body.dark-blue-mode .modal .close-modal {
+    body.dark-blue-mode .type-option input:checked + span strong {
+      color: #38bdf8 !important;
+    }
+
+    body.dark-blue-mode .close-modal {
+      background-color: #14244b !important;
+      color: #38bdf8 !important;
+    }
+
+    body.dark-blue-mode .modal-icon,
+    body.dark-blue-mode .card-icon,
+    body.dark-blue-mode .small-icon,
+    body.dark-blue-mode .expense-icon {
       background-color: #14244b !important;
       color: #38bdf8 !important;
     }
   </style>
-</head>
 <body>
 
   <!-- ==============================
