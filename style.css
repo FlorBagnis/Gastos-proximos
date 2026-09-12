@@ -1372,3 +1372,31 @@ body.dark-blue-mode .modal textarea {
   color: #38bdf8 !important;
   border-color: #14244b !important;
 }
+
+
+/* =========================================================
+   CORRECCIÓN FINAL OPCIONES DEL MODAL EN MODO AZUL
+========================================================= */
+body.dark-blue-mode .modal .type-option span,
+body.dark-blue-mode .modal .type-option span * {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .modal .type-option input:checked + span,
+body.dark-blue-mode .modal .type-option input:checked + span * {
+  background-color: #10214a !important;
+  color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .modal .type-option span strong {
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .modal .type-option input:checked + span strong {
+  color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .modal .type-option span small {
+  color: #8fa5ca !important;
+}
