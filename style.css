@@ -1157,3 +1157,23 @@ body.dark-blue-mode .badge {
   border-color: #1e3a8a !important;
 }
 
+/* FORZAR TARJETA PRINCIPAL Y RESTO DE ELEMENTOS EN MODO AZUL */
+body.dark-blue-mode .summary-card.main-card,
+body.dark-blue-mode .summary-card,
+body.dark-blue-mode .expense,
+body.dark-blue-mode .empty-state {
+  background-color: #0f1c3f !important;
+  border-color: #14244b !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-blue-mode .main-card strong {
+  color: #38bdf8 !important;
+}
+
+body.dark-blue-mode .card-icon,
+body.dark-blue-mode .small-icon,
+body.dark-blue-mode .expense-icon {
+  background-color: #14244b !important;
+  color: #38bdf8 !important;
+}
