@@ -1440,22 +1440,25 @@ body.dark-blue-mode .toolbar {
 
 
 /* =========================================================
-   MODO AZUL LIMPIO Y ARMONIOSO (SIN BORDES FORZADOS)
+   DISEÑO UNIFICADO DE TARJETAS FLOTANTES (MODO AZUL)
 ========================================================= */
 body.dark-blue-mode header.header {
   background: #0f1c3f !important;
   background-color: #0f1c3f !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  border: 1px solid #14244b !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 body.dark-blue-mode .toolbar {
   background: #0f1c3f !important;
   background-color: #0f1c3f !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  border: 1px solid #14244b !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  margin-top: 24px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
-
-
